@@ -1,0 +1,140 @@
+/* fx.css: extra effects layered on top of style.css.
+   Remove this file's <link> tag in index.html to go back to the plain site. */
+
+/* ---------- Starfield background ---------- */
+#starfield {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+  pointer-events: none;
+}
+
+/* Smooth color change when the theme toggles */
+body { transition: background-color .4s ease, color .4s ease; }
+
+/* ---------- One page-load sequence ---------- */
+h1       { animation: fx-rise .7s ease both; }
+.tagline { animation: fx-rise .7s .12s ease both; }
+nav      { animation: fx-rise .7s .24s ease both; }
+@keyframes fx-rise {
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: none; }
+}
+
+/* Nav links: underline slides in instead of popping */
+nav a {
+  background: linear-gradient(currentColor, currentColor) 0 100% / 0 2px no-repeat;
+  transition: background-size .3s ease;
+  padding-bottom: 2px;
+}
+nav a:hover { text-decoration: none; background-size: 100% 2px; }
+
+/* ---------- Mission progress (rocket bar) ---------- */
+.mission { margin: 0 0 1.5rem; }
+.mission-label {
+  display: flex;
+  justify-content: space-between;
+  font-size: .9rem;
+  color: var(--muted);
+  margin-bottom: .6rem;
+}
+.mission-label strong { color: var(--fg); }
+.mission-track {
+  position: relative;
+  height: 6px;
+  border-radius: 99px;
+  background: var(--border);
+}
+.mission-fill {
+  height: 100%;
+  width: var(--progress, 0%);
+  border-radius: inherit;
+  background: var(--accent);
+  transition: width 1.6s cubic-bezier(.22, 1, .36, 1);
+}
+.mission-rocket {
+  position: absolute;
+  top: 50%;
+  left: var(--progress, 0%);
+  transform: translate(-50%, -55%) rotate(45deg);
+  font-size: 1.3rem;
+  transition: left 1.6s cubic-bezier(.22, 1, .36, 1);
+}
+/* small markers at each artifact stop */
+.mission-stop {
+  position: absolute;
+  top: 50%;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  background: var(--bg);
+  border: 2px solid var(--border);
+}
+.mission-stop.reached { border-color: var(--accent); background: var(--accent); }
+
+/* ---------- Cards ---------- */
+.card {
+  position: relative;
+  overflow: hidden;
+  transform: perspective(900px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg));
+  transition: opacity .6s ease, transform .6s ease, box-shadow .3s ease,
+              border-color .3s ease, background-color .4s ease;
+}
+.card > * { position: relative; z-index: 1; }
+
+/* cards rise in, in order, as they scroll into view */
+.card.fx-hidden { opacity: 0; transform: translateY(24px); }
+
+/* spotlight that follows the mouse */
+.card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity .3s ease;
+  background: radial-gradient(320px circle at var(--mx, 50%) var(--my, 50%),
+              color-mix(in srgb, var(--accent) 16%, transparent), transparent 70%);
+}
+.card.fx-tilting::before { opacity: 1; }
+.card.fx-tilting {
+  transition: transform .1s ease-out, box-shadow .3s ease, border-color .3s ease;
+  border-color: color-mix(in srgb, var(--accent) 55%, var(--border));
+  box-shadow: 0 14px 34px -16px color-mix(in srgb, var(--accent) 60%, transparent);
+}
+
+/* finished artifacts get a "live" pulse next to the badge */
+.card.done .badge::before {
+  content: "";
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  margin-right: .45rem;
+  vertical-align: middle;
+  border-radius: 50%;
+  background: #22c55e;
+  animation: fx-pulse 2s ease-out infinite;
+}
+@keyframes fx-pulse {
+  0%   { box-shadow: 0 0 0 0 rgba(34, 197, 94, .6); }
+  100% { box-shadow: 0 0 0 8px rgba(34, 197, 94, 0); }
+}
+
+/* ---------- Theme toggle spin ---------- */
+#theme-toggle:focus-visible,
+.card a:focus-visible,
+nav a:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+#theme-toggle.fx-spin { animation: fx-spin .5s ease; }
+@keyframes fx-spin { to { transform: rotate(360deg); } }
+
+/* ---------- Respect "reduce motion" settings ---------- */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+}
