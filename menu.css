@@ -1,0 +1,218 @@
+/* menu.css: restyles the artifact section like a Korean restaurant menu board.
+   Works on top of style.css. Remove its <link> tag in index.html to undo. */
+@import url("https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&family=Nanum+Brush+Script&display=swap");
+
+/* ---------- Menu colors (only used inside the menu board) ---------- */
+.menu-board {
+  --paper: #f3ead8;
+  --ink: #2b211b;
+  --ink-soft: #7a6a58;
+  --rule: #c9b598;
+  --seal: #b8322a;
+  --texture-opacity: .35;
+}
+:root[data-theme="dark"] .menu-board {
+  --paper: #241912;
+  --ink: #f1e6d2;
+  --ink-soft: #b9a68c;
+  --rule: #5c4634;
+  --seal: #e0574c;
+  --texture-opacity: .18;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .menu-board {
+    --paper: #241912;
+    --ink: #f1e6d2;
+    --ink-soft: #b9a68c;
+    --rule: #5c4634;
+    --seal: #e0574c;
+    --texture-opacity: .18;
+  }
+}
+
+/* ---------- The board itself ---------- */
+.menu-board {
+  position: relative;
+  margin-top: 2rem;
+  padding: 2.2rem clamp(1rem, 4vw, 2.5rem) 2rem;
+  background: var(--paper);
+  color: var(--ink);
+  border: 2px solid var(--ink);
+  outline: 1px solid var(--ink);
+  outline-offset: -8px;           /* double frame, like a printed menu */
+  border-radius: 4px;
+  font-family: "Gowun Batang", Georgia, "Times New Roman", serif;
+  isolation: isolate;
+  transition: background-color .4s ease, color .4s ease;
+}
+/* hanji paper fibers */
+.menu-board::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  opacity: var(--texture-opacity);
+  pointer-events: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .45 0 0 0 0 .35 0 0 0 0 .25 0 0 0 .5 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+.menu-head { text-align: center; margin-bottom: 1.4rem; }
+.menu-title {
+  font-family: "Nanum Brush Script", "Gowun Batang", cursive;
+  font-size: clamp(3rem, 9vw, 4.4rem);
+  line-height: 1;
+  display: block;
+}
+.menu-board h2 {
+  border: 0;
+  margin: .3rem 0 0;
+  padding: 0;
+  font-size: 1.15rem;
+  font-weight: 700;
+  letter-spacing: .02em;
+}
+.menu-sub { margin: .2rem 0 0; color: var(--ink-soft); font-size: .95rem; }
+
+/* ---------- Menu items (your cards) ---------- */
+.menu-board .grid {
+  gap: 0 2.5rem;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 340px), 1fr));
+}
+.menu-board .card,
+.menu-board .card.idea {
+  position: relative;
+  background: none;
+  border: 0;
+  border-top: 1px solid var(--rule);
+  border-radius: 0;
+  padding: 1.1rem 0 1.2rem;
+  opacity: 1;
+}
+.menu-board .badge {
+  color: var(--ink-soft);
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  font-size: .72rem;
+}
+
+/* title ........ status, like dish ........ price */
+.menu-row { display: flex; align-items: baseline; gap: .5rem; }
+.menu-board .card h3 { margin: .2rem 0; font-size: 1.15rem; }
+.menu-leader {
+  flex: 1;
+  min-width: 1.5rem;
+  border-bottom: 2px dotted var(--rule);
+  transform: translateY(-.3em);
+}
+.menu-price { white-space: nowrap; font-weight: 700; text-align: right; line-height: 1.2; }
+.menu-price small {
+  display: block;
+  font-weight: 400;
+  font-size: .72rem;
+  color: var(--ink-soft);
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+.card.done .menu-price { color: var(--seal); }
+.card.idea .menu-price { color: var(--ink-soft); }
+
+.menu-board .card p { margin: .4rem 0; }
+.menu-board .reflection { color: var(--ink-soft); }
+.menu-board .card a { color: var(--seal); }
+.menu-board .card a:hover { text-decoration: underline; }
+
+/* red ink seal on the finished item: 대표 = house specialty */
+.menu-seal {
+  position: absolute;
+  top: .9rem;
+  right: 0;
+  width: 2.6rem;
+  height: 2.6rem;
+  display: grid;
+  place-items: center;
+  border: 2px solid var(--seal);
+  border-radius: 6px;
+  color: var(--seal);
+  font-weight: 700;
+  font-size: .95rem;
+  transform: rotate(-8deg);
+  opacity: .9;
+}
+.card.done .menu-row { padding-right: 3.4rem; }
+
+/* steam rising from the house specialty */
+.menu-steam {
+  position: absolute;
+  top: -1.4rem;
+  right: .7rem;
+  display: flex;
+  gap: .3rem;
+  pointer-events: none;
+}
+.menu-steam span {
+  width: 3px;
+  height: 1.3rem;
+  border-radius: 3px;
+  background: var(--ink-soft);
+  opacity: 0;
+  animation: menu-steam 2.8s ease-in-out infinite;
+}
+.menu-steam span:nth-child(2) { animation-delay: .6s; }
+.menu-steam span:nth-child(3) { animation-delay: 1.2s; }
+@keyframes menu-steam {
+  0%   { opacity: 0;  transform: translateY(8px) scaleY(.6); }
+  40%  { opacity: .5; }
+  100% { opacity: 0;  transform: translateY(-10px) scaleY(1.1) skewX(12deg); }
+}
+
+/* ---------- Table call bell (호출) ---------- */
+.call-bell {
+  position: fixed;
+  right: 1.2rem;
+  bottom: calc(1.2rem + env(safe-area-inset-bottom, 0px));
+  z-index: 20;
+  width: 3.6rem;
+  height: 3.6rem;
+  border-radius: 50%;
+  border: 3px solid #f3ead8;
+  background: #b8322a;
+  color: #fff;
+  font: 700 .95rem "Gowun Batang", Georgia, serif;
+  cursor: pointer;
+  box-shadow: 0 6px 16px -6px rgba(0, 0, 0, .5), inset 0 -4px 0 rgba(0, 0, 0, .2);
+  transition: transform .1s ease;
+}
+.call-bell:active { transform: scale(.92); }
+.call-bell:focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; }
+.call-bell.ringing { animation: bell-ring .5s ease; }
+@keyframes bell-ring {
+  20% { transform: rotate(-12deg); }
+  40% { transform: rotate(10deg); }
+  60% { transform: rotate(-6deg); }
+  80% { transform: rotate(4deg); }
+}
+.call-note {
+  position: fixed;
+  right: 1.2rem;
+  bottom: calc(5.6rem + env(safe-area-inset-bottom, 0px));
+  z-index: 20;
+  width: min(17rem, calc(100vw - 2.4rem));
+  padding: 1rem 1.1rem;
+  background: var(--card);
+  color: var(--fg);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  box-shadow: 0 12px 30px -12px rgba(0, 0, 0, .45);
+  font-size: .92rem;
+}
+.call-note[hidden] { display: none; }
+.call-note strong { font-family: "Gowun Batang", Georgia, serif; font-size: 1.1rem; }
+.call-note p { margin: .3rem 0 .6rem; color: var(--muted); }
+.call-note a { color: var(--accent); font-weight: 600; text-decoration: none; margin-right: 1rem; }
+.call-note a:hover { text-decoration: underline; }
+
+/* footer clears the bell on small screens */
+footer { padding-bottom: 5rem; }
+
+@media (prefers-reduced-motion: reduce) {
+  .menu-steam, .call-bell.ringing { animation: none; }
+  .menu-steam span { animation: none; opacity: .35; }
+}
