@@ -17,6 +17,7 @@ Tool: Claude (chat). Date: 2026-10-08
 - Replaced the LinkedIn placeholder with my LinkedIn link.
 - Replaced the email placeholder with my email address.
 - (add: any change to the About text or to cards 2 to 5, or delete this line)
+- Asked Claude to make the site look like a Korean restaurant menu without changing my existing files. Added menu.css and menu.js (menu board styling, 완료/준비중 status like menu prices, a 대표 seal on finished artifacts, and a 호출 call bell with my contact links). I linked them in index.html with two lines.
 
 ## Issues
 - Have to be very specific and ran out of usage credits since each time you must tailor the work with another prompt.
