@@ -1,6 +1,4 @@
-// intro.js: front page with an Enter button that sword-cuts into the site,
-// hero atmosphere (fog, rings, echoes, callouts, dot nav, signature), and the figure fallback.
-// Loaded in <head>. Remove its <script> tag in index.html to undo.
+
 (() => {
   const root = document.documentElement;
   const reduceMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -21,6 +19,13 @@
     setupAtmosphere();
     if (showGate) buildGate();
   });
+
+  // "Back" button in the top bar calls this to return to the front page
+  window.showFrontPage = () => {
+    if (document.querySelector(".gate")) return;
+    scrollTo({ top: 0 });
+    buildGate(true);
+  };
 
   function make(tag, className, text) {
     const node = document.createElement(tag);
@@ -68,15 +73,7 @@
       <span>Portfolio</span><span class="ticks">: : : : : : ✕ : : : : : :</span><span>Autumn 2026</span>`;
     hero.prepend(hud);
 
-    // outlined echoes under the giant word
     const word = hero.querySelector(".giant-word");
-    if (word) {
-      ["e1", "e2", "e3"].forEach(k => {
-        const echo = make("span", "giant-word echo " + k, word.textContent);
-        echo.setAttribute("aria-hidden", "true");
-        word.after(echo);
-      });
-    }
 
     // fog
     const fog = make("div", "fog");
@@ -89,11 +86,6 @@
     rings.setAttribute("aria-hidden", "true");
     rings.innerHTML = "<span></span><span></span>";
     if (portrait) hero.insertBefore(rings, portrait); else hero.append(rings);
-
-    // signature
-    const signature = make("span", "signature", "Matthew Park");
-    signature.setAttribute("aria-hidden", "true");
-    hero.append(signature);
 
     // callouts (x, y are fractions of the figure/photo box)
     const done = cards.filter(c => c.status === "done").length;
@@ -153,13 +145,6 @@
       rings.style.left = left + box.width / 2 + "px";
       rings.style.top = top + box.height * (visible ? .38 : .5) + "px";
 
-      if (visible) {
-        signature.style.left = left + box.width * (usingFigure ? .28 : .56) + "px";
-        signature.style.top = top + box.height * (usingFigure ? .8 : .62) + "px";
-      } else {                                // name only: sign just under the big word
-        signature.style.left = left + box.width * .4 + "px";
-        signature.style.top = top + box.height * 1.02 + "px";
-      }
 
       const spots = usingFigure ? SPOTS.figure : SPOTS.photo;
       callouts.forEach((c, i) => {
@@ -179,7 +164,7 @@
   }
 
   /* ---------- Front page ---------- */
-  function buildGate() {
+  function buildGate(returning = false) {
     const page = document.querySelector(".page");
     if (page) page.inert = true;
 
@@ -190,7 +175,7 @@
       </div>
       <div class="gate-center">
         <span class="gate-kicker">TCSS 490 · Autumn 2026</span>
-        <span class="gate-name">MATTHEW PARK<span class="gate-echo">MATTHEW PARK</span><span class="gate-echo">MATTHEW PARK</span><span class="gate-echo">MATTHEW PARK</span></span>
+        <span class="gate-name">MATTHEW PARK</span>
         <span class="gate-ko" lang="ko">매튜 박</span>
         <button type="button" class="gate-enter" ${copy ? 'tabindex="-1" aria-hidden="true"' : ""}>Enter <span class="arrow" aria-hidden="true">→</span></button>
         <span class="gate-sub">CS student at UW · Class of 2027</span>
@@ -211,6 +196,7 @@
 
     const button = gate.querySelector(".gate-top .gate-enter");
     button.focus({ preventScroll: true });
+    if (returning) rejoin(gate);
 
     let opened = false;
     const open = () => {
@@ -226,6 +212,34 @@
     addEventListener("keydown", onKey);
   }
 
+  // the two halves fly back in and seal shut
+  function rejoin(gate) {
+    const W = innerWidth, H = innerHeight;
+    const lx = W, ly = -0.56 * H, len = Math.hypot(lx, ly);
+    const nx = -ly / len, ny = lx / len, far = Math.max(W, H) * 0.9;
+    const flashEl = gate.querySelector(".gate-flash");
+    if (reduceMotion) {
+      gate.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 250 });
+      return;
+    }
+    gate.classList.add("cutting");
+    const ease = "cubic-bezier(.3, 0, .2, 1)";
+    [[".gate-top", -1], [".gate-bottom", 1]].forEach(([sel, dir]) => {
+      gate.querySelector(sel).animate([
+        { transform: `translate(${dir * nx * far}px, ${dir * ny * far}px)`, opacity: .6 },
+        { transform: "translate(0, 0)", opacity: 1 }
+      ], { duration: 650, easing: ease });
+    });
+    setTimeout(() => {
+      gate.classList.remove("cutting");
+      flashEl.animate([{ opacity: 0 }, { opacity: .3 }, { opacity: 0 }], { duration: 260 });
+      gate.animate([
+        { transform: "translate(0, 0)" }, { transform: "translate(5px, -3px)" },
+        { transform: "translate(-4px, 2px)" }, { transform: "translate(0, 0)" }
+      ], { duration: 180 });
+    }, 640);
+  }
+
   function reveal(gate, page) {
     root.classList.remove("gate-playing", "gate-on");
     if (page) page.inert = false;
@@ -237,6 +251,7 @@
   function quickOpen(gate, page) {
     gate.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 250 }).finished.then(() => reveal(gate, page));
     root.classList.remove("gate-playing");
+    document.dispatchEvent(new Event("gate-opened"));
   }
 
   /* ---------- The cut ---------- */
@@ -286,7 +301,10 @@
     fly(top, -1);
     fly(bottom, 1);
 
-    setTimeout(() => root.classList.remove("gate-playing"), T + 450);
+    setTimeout(() => {
+      root.classList.remove("gate-playing");
+      document.dispatchEvent(new Event("gate-opened"));
+    }, T + 450);
     setTimeout(() => reveal(gate, page), T + 1250);
   }
 
