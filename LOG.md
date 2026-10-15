@@ -17,6 +17,7 @@ Tool: Claude (chat). Date: 2026-10-08
 - Replaced the LinkedIn placeholder with my LinkedIn link.
 - Replaced the email placeholder with my email address.
 - (add: any change to the About text or to cards 2 to 5, or delete this line)
+- Redesigned the site with a dark crimson style inspired by a restaurant landing page I liked. Added a giant “PARK” title with my cutout photo layered in front, 매튜 박 in red, mouse movement that creates a depth effect, rising ember particles, pill-shaped navigation, and glass-style artifact cards at the bottom that open a popup when clicked. Kept my original text and left cards.js the same.
 
 ## Issues
 - Have to be very specific and ran out of usage credits since each time you must tailor the work with another prompt.
