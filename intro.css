@@ -1,4 +1,3 @@
-@import url("https://fonts.googleapis.com/css2?family=Mrs+Saint+Delafield&display=swap");
 
 /* Cover the page until the front page is built, so nothing flashes first */
 html.gate-on::before {
@@ -21,7 +20,7 @@ html.gate-playing .page * { animation-play-state: paused !important; }
     radial-gradient(70% 65% at 50% 50%, #2e0a0d, #0a0203 78%);
   will-change: transform;
 }
-.gate-top    { clip-path: polygon(0 0, 100% 0, 100% 22%, 0 78%); }
+.gate-top    { clip-path: polygon(0 0, 100% 0, 100% calc(22% + 2px), 0 calc(78% + 2px)); z-index: 1; }
 .gate-bottom { clip-path: polygon(0 78%, 100% 22%, 100% 100%, 0 100%); }
 
 .gate-hud {
@@ -45,23 +44,17 @@ html.gate-playing .page * { animation-play-state: paused !important; }
 }
 .gate-name {
   position: relative;
-  color: #efe6d8;
+  color: transparent;
+  background: linear-gradient(105deg, #efe6d8 0%, #efe6d8 42%, #ffe9c9 48%, #ffffff 50%, #ffe9c9 52%, #efe6d8 58%, #efe6d8 100%);
+  background-size: 300% 100%;
+  -webkit-background-clip: text; background-clip: text;
+  filter: drop-shadow(0 6px 28px rgba(255, 120, 80, .18));
   font-family: "Gloock", Georgia, serif;
   font-size: clamp(2.6rem, 10vw, 7rem);
   line-height: 1; letter-spacing: .04em;
 }
-.gate-echo {
-  position: absolute; left: 0; right: 0; top: 0;
-  color: transparent;
-  -webkit-text-stroke: 1px rgba(239, 230, 216, .22);
-  clip-path: inset(0 0 80% 0);
-  pointer-events: none;
-}
-.gate-echo:nth-child(1) { translate: 0 .82em; opacity: .9; }
-.gate-echo:nth-child(2) { translate: 0 1.06em; opacity: .55; }
-.gate-echo:nth-child(3) { translate: 0 1.3em; opacity: .3; }
 .gate-ko {
-  margin-top: 2.6rem;
+  margin-top: 1.2rem;
   color: #c8202f;
   font-family: "Noto Serif KR", "Gloock", serif; font-weight: 900;
   font-size: clamp(1.3rem, 3.6vw, 2.2rem);
@@ -95,6 +88,7 @@ html.gate-playing .page * { animation-play-state: paused !important; }
 .gate-enter:hover .arrow { transform: translateX(4px); }
 .gate-enter:active { transform: scale(.96); }
 .gate-enter:focus-visible { outline: 2px solid #ff4250; outline-offset: 6px; }
+@keyframes sheen { 0% { background-position: 100% 0; } 55%, 100% { background-position: 0% 0; } }
 @keyframes gate-pulse { from { opacity: .9; transform: scale(.96); } to { opacity: 0; transform: scale(1.18); } }
 
 .gate-sub { margin-top: .9rem; color: rgba(239, 230, 216, .4); font: 500 .72rem "Manrope", system-ui, sans-serif; letter-spacing: .15em; text-transform: uppercase; }
@@ -106,6 +100,7 @@ html.gate-playing .page * { animation-play-state: paused !important; }
 .gate-center > :nth-child(4) { animation-delay: .35s; }
 .gate-center > :nth-child(5) { animation-delay: .45s; }
 @keyframes gate-rise { from { opacity: 0; transform: translateY(14px); } }
+.gate-center > .gate-name { animation: gate-rise .9s .1s cubic-bezier(.2, .8, .2, 1) backwards, sheen 6s 1s ease-in-out infinite; }
 
 /* the blade stroke */
 .gate-slash {
@@ -247,19 +242,6 @@ html.gate-playing .page * { animation-play-state: paused !important; }
    Reference vibes on the hero
    ========================================================== */
 
-/* outlined echoes under the giant word */
-.echo {
-  position: absolute; left: 0; right: 0; top: 0; z-index: 0;
-  color: transparent !important;
-  -webkit-text-stroke: 1.5px rgba(239, 230, 216, .2);
-  clip-path: inset(0 0 74% 0);
-  pointer-events: none;
-}
-:root[data-theme="light"] .echo { -webkit-text-stroke-color: rgba(42, 11, 14, .2); }
-.echo.e1 { translate: 0 .8em;  opacity: .9; }
-.echo.e2 { translate: 0 .98em; opacity: .55; }
-.echo.e3 { translate: 0 1.16em; opacity: .28; }
-
 /* HUD strip at the top of the hero */
 .hud-strip {
   position: relative; z-index: 3;
@@ -271,18 +253,6 @@ html.gate-playing .page * { animation-play-state: paused !important; }
 }
 .hud-strip .ticks { flex: 1; text-align: center; color: var(--line); }
 :root:not([data-theme="light"]) .hud-strip .ticks { color: rgba(239, 230, 216, .25); }
-
-/* handwritten signature near the figure */
-.signature {
-  position: absolute; z-index: 3;
-  font-family: "Mrs Saint Delafield", "Brush Script MT", cursive;
-  font-size: clamp(2rem, 4vw, 3.2rem);
-  color: var(--fg); opacity: .55;
-  transform: rotate(-10deg);
-  white-space: nowrap;
-  pointer-events: none;
-  animation: fade-in 1.2s 1.6s ease both;
-}
 
 /* astronaut figure (shown when there's no me.png) */
 .portrait.is-figure img {
@@ -300,9 +270,10 @@ html.gate-playing .page * { animation-play-state: paused !important; }
 }
 
 @media (max-width: 960px) {
-  .signature, .hud-strip .ticks, .callout, .dot-nav, .rings { display: none !important; }
+  .hud-strip .ticks, .callout, .dot-nav, .rings { display: none !important; }
 }
 @media (prefers-reduced-motion: reduce) {
   .portrait.is-figure img { animation: none; }
   .gate-enter::before { animation: none; }
+  .gate-name { animation: none; }
 }
