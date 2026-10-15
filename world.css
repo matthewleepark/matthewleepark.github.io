@@ -115,6 +115,7 @@ html.world-entering .world-bg { animation: world-in 1.6s cubic-bezier(.2, .8, .2
   content: attr(data-ch);
   position: absolute; left: 0; top: 0;
   color: var(--display);
+  -webkit-text-fill-color: var(--display);
   opacity: 0; pointer-events: none;
 }
 .giant-word .ltr::before { clip-path: polygon(0 0, 100% 0, 100% var(--c2, 42%), 0 var(--c1, 58%)); }
@@ -259,7 +260,11 @@ html.aurora-on:root.world[data-theme="light"] .aurora { opacity: .4; }
 .giant-word .ltr:nth-child(5) { animation-delay: 2.2s; }
 .giant-word .ltr:nth-child(6) { animation-delay: 2.35s; }
 /* while a letter is being sliced, hide the whole letter so only the two halves show */
-.giant-word .ltr.sliced { background: none; }
+.giant-word .ltr.sliced {
+  background: none !important;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+}
 @keyframes world-sheen { 0% { background-position: 100% 0; } 55%, 100% { background-position: 0% 0; } }
 
 /* top bar stays at the top while you scroll */
