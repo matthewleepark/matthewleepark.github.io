@@ -1,4 +1,5 @@
 
+// Remove its <script> tag in index.html to undo.
 (() => {
   const root = document.documentElement;
   const reduceMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -36,8 +37,48 @@
       setupTrail();
     }
     setupEasterEgg(word);
+    arrangeHero(hero);
+    addBackButton();
     watchEntry();
   });
+
+  /* ---------- Big tagline on the left, About + stats + buttons on the right ---------- */
+  function arrangeHero(hero) {
+    const row = hero.querySelector(".hero-row");
+    const intro = row && row.querySelector(".intro");
+    const tagline = intro && intro.querySelector(".tagline");
+    const cta = row && row.querySelector(".cta");
+    if (!row || !intro || !tagline) return;
+    const left = make("div", "hero-left");
+    left.append(tagline);
+    row.prepend(left);
+
+    const cards = typeof CARDS !== "undefined" ? CARDS : [];
+    const done = cards.filter(c => c.status === "done").length;
+    const stats = make("dl", "hero-stats");
+    [[done + "/" + (cards.length || 5), "artifacts done"], ["2027", "graduating"], ["UW", "computer science"]]
+      .forEach(([big, small]) => {
+        const item = make("div");
+        item.append(make("dt", null, big), make("dd", null, small));
+        stats.append(item);
+      });
+    intro.prepend(stats);
+    if (cta) intro.append(cta);
+  }
+
+  /* ---------- Back to the front page ---------- */
+  function addBackButton() {
+    const toggle = document.getElementById("theme-toggle");
+    if (!toggle || typeof window.showFrontPage !== "function") return;
+    const actions = make("div", "top-actions");
+    toggle.before(actions);
+    const back = make("button", "back-btn");
+    back.type = "button";
+    back.innerHTML = '<span aria-hidden="true">←</span> <span class="back-label">Front page</span>';
+    back.setAttribute("aria-label", "Back to the front page");
+    back.addEventListener("click", () => window.showFrontPage());
+    actions.append(back, toggle);
+  }
 
   function make(tag, className, text) {
     const n = document.createElement(tag);
@@ -88,6 +129,7 @@
     svg.setAttribute("preserveAspectRatio", "none");
     hz = Math.max(H * 0.3, Math.min(H * 0.8, hz));
     const sunX = W * 0.11, sunY = hz - wh * 0.86, sunR = Math.max(22, wh * 0.11);
+    const moonX = W * 0.13, moonY = hz - wh * 0.86, moonR = Math.max(26, wh * 0.15);
 
     let stars = "";
     const r = rng(7);
@@ -98,13 +140,17 @@
       stars += `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${(0.3 + r() * 1.1).toFixed(2)}" opacity="${(0.3 + r() * 0.7).toFixed(2)}"${tw}/>`;
     }
 
-    let glints = "";
-    for (let i = 0; i < (W < 700 ? 0 : 9); i++) {
-      const y = hz + 12 + i * Math.max(10, (H - hz) / 14);
-      const w = sunR * (1.6 - i * 0.12) + 6;
-      glints += `<rect class="shimmer" x="${(sunX - w / 2).toFixed(1)}" y="${y.toFixed(1)}" width="${w.toFixed(1)}" height="${(3 + i * 0.4).toFixed(1)}" rx="2"
-        fill="var(--sun)" opacity="${(0.55 - i * 0.05).toFixed(2)}" style="--td:${(-i * 0.3).toFixed(1)}s; transform-origin:${sunX}px ${y}px"/>`;
-    }
+    const glintsFor = (cx, r, color, cls) => {
+      let out = "";
+      for (let i = 0; i < (W < 700 ? 0 : 9); i++) {
+        const y = hz + 12 + i * Math.max(10, (H - hz) / 14);
+        const w = r * (1.6 - i * 0.12) + 6;
+        out += `<rect class="shimmer ${cls}" x="${(cx - w / 2).toFixed(1)}" y="${y.toFixed(1)}" width="${w.toFixed(1)}" height="${(3 + i * 0.4).toFixed(1)}" rx="2"
+          fill="${color}" opacity="${(0.32 - i * 0.03).toFixed(2)}" style="--td:${(-i * 0.3).toFixed(1)}s; transform-origin:${cx}px ${y}px"/>`;
+      }
+      return out;
+    };
+    const glints = glintsFor(sunX, sunR, "var(--sun)", "for-sun") + glintsFor(moonX, moonR * .8, "#f4f7fb", "for-moon");
 
     svg.innerHTML = `
       <defs>
@@ -122,16 +168,30 @@
           <stop offset="0" style="stop-color:var(--sun)" stop-opacity=".55"/>
           <stop offset="1" style="stop-color:var(--sun)" stop-opacity="0"/>
         </radialGradient>
+        <radialGradient id="w-moonglow">
+          <stop offset="0" stop-color="#ffffff" stop-opacity=".55"/>
+          <stop offset=".35" stop-color="#dfe8f5" stop-opacity=".18"/>
+          <stop offset="1" stop-color="#dfe8f5" stop-opacity="0"/>
+        </radialGradient>
         <filter id="w-blur" x="-20%" y="-50%" width="140%" height="200%"><feGaussianBlur stdDeviation="14"/></filter>
       </defs>
       <rect width="${W}" height="${H}" fill="url(#w-sky)"/>
       <g fill="var(--star)" style="opacity:var(--star-op)">${stars}</g>
-      <circle cx="${sunX}" cy="${sunY}" r="${sunR * 4.5}" fill="url(#w-sunglow)"/>
-      <circle cx="${sunX}" cy="${sunY}" r="${sunR}" fill="var(--sun)"/>
+      <g class="sun">
+        <circle cx="${sunX}" cy="${sunY}" r="${sunR * 4.5}" fill="url(#w-sunglow)"/>
+        <circle cx="${sunX}" cy="${sunY}" r="${sunR}" fill="var(--sun)"/>
+      </g>
+      <g class="moon">
+        <circle cx="${moonX}" cy="${moonY}" r="${moonR * 4}" fill="url(#w-moonglow)"/>
+        <circle cx="${moonX}" cy="${moonY}" r="${moonR}" fill="#f6f8fb"/>
+        <circle cx="${moonX - moonR * .3}" cy="${moonY - moonR * .15}" r="${moonR * .18}" fill="#e3e8ef" opacity=".6"/>
+        <circle cx="${moonX + moonR * .28}" cy="${moonY + moonR * .3}" r="${moonR * .12}" fill="#e3e8ef" opacity=".5"/>
+        <circle cx="${W * .72}" cy="${hz - wh * 1.5}" r="${Math.max(3, wh * .02)}" fill="#f6f8fb" opacity=".8"/>
+      </g>
       <g class="far">
-        <path d="${ridgePath(W, hz, wh * 0.2, wh * 0.95, 11, 16)}" fill="var(--m-far)"/>
+        <path d="${ridgePath(W, hz, wh * 0.2, wh * 0.95, 11, 16)}" fill="var(--m-far)" stroke="var(--snow)" stroke-width="2"/>
         <rect x="0" y="${hz - wh * 0.25}" width="${W}" height="${wh * 0.3}" fill="var(--fog-tint)" filter="url(#w-blur)"/>
-        <path d="${ridgePath(W, hz, wh * 0.1, wh * 0.55, 23, 22)}" fill="var(--m-mid)"/>
+        <path d="${ridgePath(W, hz, wh * 0.1, wh * 0.55, 23, 22)}" fill="var(--m-mid)" stroke="var(--snow)" stroke-width="1.2"/>
       </g>
       <rect x="0" y="${hz - 1}" width="${W}" height="${H - hz + 1}" fill="url(#w-lake)"/>
       ${glints}
@@ -331,6 +391,22 @@
       { transform: `translate(${s.dx * 120}px, ${s.dy * 120}px) rotate(${s.rot}deg) scale(.94)` }
     ], { duration: 1600, easing: "cubic-bezier(.2,.8,.2,1)", fill: "forwards" }));
     await sleep(1650);
+
+    // 5b. fall through the void into the Slice Dimension (game.js), then come back
+    if (window.SliceGame) {
+      const shardsEl = egg.querySelector(".egg-shards");
+      flash(1, 700);
+      sfx.shing(1);
+      await sleep(250);
+      shardsEl.style.visibility = "hidden";
+      egg.classList.remove("bars");
+      title.style.visibility = "hidden";
+      await window.SliceGame.play();
+      egg.classList.add("bars");
+      shardsEl.style.visibility = "";
+      flash(.8, 500);
+      await sleep(350);
+    }
 
     // 6. it slams back together
     shards.forEach(s => s.el.animate([
@@ -547,13 +623,12 @@
   /* ---------- Rush into the world when the cut opens ---------- */
   function watchEntry() {
     const enter = () => {
+      root.classList.remove("world-entering");
+      void root.offsetWidth;
       root.classList.add("world-entering");
       setTimeout(() => root.classList.remove("world-entering"), 1700);
     };
-    if (!root.classList.contains("gate-playing")) { enter(); return; }
-    const obs = new MutationObserver(() => {
-      if (!root.classList.contains("gate-playing")) { obs.disconnect(); enter(); }
-    });
-    obs.observe(root, { attributes: true, attributeFilter: ["class"] });
+    document.addEventListener("gate-opened", enter);        // every time the front page is cut open
+    if (!root.classList.contains("gate-playing")) enter();  // no front page this visit
   }
 })();
