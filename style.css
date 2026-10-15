@@ -1,8 +1,3 @@
-/* ==========================================================
-   Matthew Park: TCSS 490 portfolio, crimson editorial hero
-   Dark is the default; the theme button switches to light.
-   ========================================================== */
-
 :root {
   color-scheme: dark;
   --bg: #120506;
