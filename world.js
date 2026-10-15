@@ -1,4 +1,5 @@
-
+// world.js: the blue "other dimension" behind the sword cut, the blade cursor trail,
+// sliceable letters, and the "park" easter egg. Loaded in <head>.
 // Remove its <script> tag in index.html to undo.
 (() => {
   const root = document.documentElement;
