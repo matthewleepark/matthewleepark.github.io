@@ -1,0 +1,230 @@
+@import url("https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@900&text=%EC%9D%BC%EC%84%AC&display=swap");
+
+/* type "park" easter egg
+
+/* ---------- Blue world colors ---------- */
+:root.world:not([data-theme="light"]) {
+  --bg: #060a14;
+  --bg-glow: #142443;
+  --display: #eef3fb;
+  --fg: #e7edf6;
+  --muted: #9aa9c2;
+  --glass: rgba(255, 255, 255, .06);
+  --glass-hover: rgba(255, 255, 255, .1);
+  --line: rgba(200, 220, 255, .15);
+  --pill-bg: rgba(255, 255, 255, .06);
+
+  --sky-1: #02050d; --sky-2: #0a1631; --sky-3: #22406d; --sky-4: #b98a78;
+  --m-far: #1b3050; --m-mid: #12223e;
+  --lake-1: #0c1833; --lake-2: #04070f;
+  --ridge: #060c19; --ridge-rim: rgba(150, 190, 255, .4);
+  --sun: #ff4d3d; --star: #dbe7ff; --star-op: 1;
+  --fog-tint: rgba(200, 222, 255, .08);
+}
+:root.world[data-theme="light"] {
+  --bg: #e3e9f0;
+  --bg-glow: #c9d6e6;
+  --display: #0d1a30;
+  --fg: #13213a;
+  --muted: #52617a;
+  --glass: rgba(255, 255, 255, .55);
+  --glass-hover: rgba(255, 255, 255, .8);
+  --line: rgba(13, 26, 48, .14);
+  --pill-bg: rgba(255, 255, 255, .5);
+
+  --sky-1: #9db2ca; --sky-2: #c3d0de; --sky-3: #e4e9ef; --sky-4: #f2d8ca;
+  --m-far: #8fa3bb; --m-mid: #74889f;
+  --lake-1: #aebdcd; --lake-2: #d3dce6;
+  --ridge: #4e6078; --ridge-rim: rgba(255, 255, 255, .45);
+  --sun: #e2412f; --star: #ffffff; --star-op: 0;
+  --fog-tint: rgba(255, 255, 255, .35);
+}
+
+html.world, html.world body { overflow-x: clip; }
+html.world .hero { overflow-x: visible; }
+
+/* orange embers become blue fireflies */
+html.world #embers { filter: hue-rotate(190deg) saturate(.75) brightness(1.15); }
+html.world .fog span { background: radial-gradient(closest-side, var(--fog-tint), transparent); }
+
+/* ---------- Landscape backdrop ---------- */
+.world-bg {
+  position: fixed; inset: 0; z-index: -1;
+  pointer-events: none;
+  overflow: hidden;
+}
+.world-bg svg { display: block; width: 100%; height: 100%; }
+.world-bg .far { transform: translate(calc(var(--wx, 0) * 10px), calc(var(--wy, 0) * 4px)); transition: transform .6s cubic-bezier(.2, .8, .2, 1); }
+.world-bg .tw { animation: twinkle var(--tw, 3s) ease-in-out infinite; animation-delay: var(--td, 0s); }
+@keyframes twinkle { 50% { opacity: .15; } }
+.world-bg .shimmer { animation: shimmer 2.6s ease-in-out infinite; animation-delay: var(--td, 0s); }
+@keyframes shimmer { 50% { opacity: .25; transform: scaleX(.7); } }
+
+.shooting-star {
+  position: absolute; top: 12%; left: 70%;
+  width: 140px; height: 1.5px;
+  background: linear-gradient(90deg, rgba(219, 231, 255, 0), #fff);
+  border-radius: 2px;
+  transform: rotate(-24deg);
+  opacity: 0;
+  filter: drop-shadow(0 0 6px #9cc2ff);
+  animation: shoot 9s 3s linear infinite;
+}
+:root.world[data-theme="light"] .shooting-star { display: none; }
+@keyframes shoot {
+  0% { opacity: 0; translate: 0 0; }
+  2% { opacity: 1; }
+  7% { opacity: 0; translate: -340px 150px; }
+  100% { opacity: 0; translate: -340px 150px; }
+}
+
+/* entering from the cut: the world rushes in */
+html.world-entering .world-bg { animation: world-in 1.6s cubic-bezier(.2, .8, .2, 1); }
+@keyframes world-in { from { transform: scale(1.18); filter: brightness(2.4) blur(8px); } }
+
+/* ---------- Ridge that hides the bottom of your name ---------- */
+.world-ridge {
+  position: absolute; z-index: 2;
+  left: calc(50% - 50vw); width: 100vw;
+  pointer-events: none;
+  animation: ridge-in 1.3s .15s cubic-bezier(.2, .8, .2, 1) backwards;
+}
+.world-ridge svg { display: block; width: 100%; height: 100%; overflow: visible; }
+@keyframes ridge-in { from { transform: translateY(40px); opacity: 0; } }
+
+/* the cut now opens onto blue light */
+.gate-flash { background: #d4e8ff !important; }
+.gate-slash { box-shadow: 0 0 8px #fff, 0 0 24px #6fb1ff, 0 0 48px rgba(90, 160, 255, .8) !important; }
+
+/* ---------- Letters you can slice ---------- */
+.giant-word .ltr { position: relative; display: inline-block; cursor: pointer; pointer-events: auto; }
+.giant-word .ltr::before,
+.giant-word .ltr::after {
+  content: attr(data-ch);
+  position: absolute; left: 0; top: 0;
+  color: var(--display);
+  opacity: 0; pointer-events: none;
+}
+.giant-word .ltr::before { clip-path: polygon(0 0, 100% 0, 100% var(--c2, 42%), 0 var(--c1, 58%)); }
+.giant-word .ltr::after  { clip-path: polygon(0 var(--c1, 58%), 100% var(--c2, 42%), 100% 100%, 0 100%); }
+.giant-word .ltr.sliced { color: transparent; }
+.giant-word .ltr.sliced::before { opacity: 1; animation: half-up .95s cubic-bezier(.2, .8, .2, 1) forwards; }
+.giant-word .ltr.sliced::after  { opacity: 1; animation: half-down .95s cubic-bezier(.2, .8, .2, 1) forwards; }
+@keyframes half-up {
+  0% { transform: none; }
+  22% { transform: translate(-.05em, -.07em) rotate(-3deg); }
+  70% { transform: translate(-.02em, -.02em) rotate(-1deg); }
+  100% { transform: none; }
+}
+@keyframes half-down {
+  0% { transform: none; }
+  22% { transform: translate(.05em, .06em) rotate(2deg); }
+  70% { transform: translate(.02em, .02em) rotate(1deg); }
+  100% { transform: none; }
+}
+
+/* a quick blade stroke used for letter slices and the easter egg */
+.world-slash {
+  position: fixed; z-index: 70;
+  height: 2px; border-radius: 2px;
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0), #fff 15%, #fff 85%, rgba(255, 255, 255, 0));
+  box-shadow: 0 0 8px #fff, 0 0 22px #6fb1ff;
+  transform-origin: 0 50%;
+  pointer-events: none;
+}
+.world-flash { position: fixed; inset: 0; z-index: 69; background: #d4e8ff; pointer-events: none; }
+.world-spark {
+  position: fixed; z-index: 71;
+  width: 3px; height: 3px; border-radius: 50%;
+  background: #e6f1ff; box-shadow: 0 0 8px #6fb1ff;
+  pointer-events: none;
+}
+.world-toast {
+  position: fixed; z-index: 72; left: 50%; bottom: 2rem;
+  padding: .6rem 1.2rem;
+  border: 1px solid rgba(200, 220, 255, .3); border-radius: 999px;
+  background: rgba(6, 10, 20, .75);
+  -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px);
+  color: #e7edf6; font: 600 .85rem var(--sans); letter-spacing: .04em;
+  translate: -50% 0;
+  pointer-events: none;
+}
+
+/* ---------- Blade cursor trail ---------- */
+.blade-trail { position: fixed; inset: 0; width: 100%; height: 100%; z-index: 60; pointer-events: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  .world-bg .tw, .world-bg .shimmer, .shooting-star { animation: none; }
+  html.world-entering .world-bg, .world-ridge { animation: none; }
+}
+
+/* ==========================================================
+   Easter egg: 일섬 (Isseom, "one flash")
+   ========================================================== */
+html.egg-hush .page,
+html.egg-hush .world-bg,
+html.egg-hush #embers { filter: grayscale(.85) brightness(.5); transition: filter .6s ease; }
+html.egg-hide body > .page,
+html.egg-hide body > .world-bg,
+html.egg-hide #embers { visibility: hidden; }
+
+.egg { position: fixed; inset: 0; z-index: 80; pointer-events: none; }
+.egg-void { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; }
+.egg-shards { position: absolute; inset: 0; }
+.egg-shard { position: absolute; inset: 0; overflow: hidden; will-change: transform; }
+.egg-shard .world-bg { position: absolute; }
+.egg-shard .egg-page { position: absolute; left: 0; right: 0; }
+.egg-shard *, .egg-shard *::before, .egg-shard *::after { animation: none !important; transition: none !important; }
+
+.egg-bar { position: absolute; left: 0; right: 0; height: 11vh; background: #000; transition: transform .55s cubic-bezier(.7, 0, .2, 1); z-index: 3; }
+.egg-bar.top { top: 0; transform: translateY(-100%); }
+.egg-bar.bottom { bottom: 0; transform: translateY(100%); }
+.egg.bars .egg-bar { transform: none; }
+
+.egg-title {
+  position: absolute; inset: 0; z-index: 4;
+  display: grid; place-content: center; justify-items: center; gap: 1rem;
+  opacity: 0;
+}
+.egg-kanji { position: relative; display: block; line-height: 1; }
+.egg-kanji .half {
+  display: block;
+  font-family: "Noto Serif KR", "Gloock", serif; font-weight: 900;
+  font-size: clamp(6rem, 24vw, 16rem);
+  color: #ff3b3b;
+  text-shadow: 0 0 30px rgba(255, 59, 59, .6), 0 0 90px rgba(255, 30, 30, .35);
+  letter-spacing: .05em;
+}
+.egg-kanji .half.b { position: absolute; inset: 0; }
+.egg-kanji .half.a { clip-path: polygon(0 0, 100% 0, 100% 36%, 0 64%); }
+.egg-kanji .half.b { clip-path: polygon(0 64%, 100% 36%, 100% 100%, 0 100%); }
+.egg-sub {
+  color: rgba(231, 237, 246, .75);
+  font: 700 .8rem var(--sans); letter-spacing: .5em; text-transform: uppercase;
+}
+.egg-flash { position: absolute; inset: 0; z-index: 5; background: #fff; opacity: 0; }
+
+/* the reward: an aurora that stays in the sky for the rest of the visit */
+.aurora {
+  position: absolute; left: -10%; right: -10%; top: -5%; height: 55%;
+  pointer-events: none;
+  mix-blend-mode: screen;
+  opacity: 0;
+  transition: opacity 2.5s ease;
+  filter: blur(28px);
+}
+html.aurora-on .aurora { opacity: .6; }
+:root.world[data-theme="light"] .aurora { mix-blend-mode: multiply; }
+html.aurora-on:root.world[data-theme="light"] .aurora { opacity: .25; }
+.aurora span {
+  position: absolute; border-radius: 50%;
+  animation: aurora 14s ease-in-out infinite alternate;
+}
+.aurora span:nth-child(1) { left: 5%;  top: 10%; width: 50%; height: 40%; background: radial-gradient(closest-side, rgba(60, 255, 180, .55), transparent); }
+.aurora span:nth-child(2) { left: 35%; top: 0;   width: 45%; height: 50%; background: radial-gradient(closest-side, rgba(90, 160, 255, .5), transparent); animation-duration: 18s; animation-delay: -6s; }
+.aurora span:nth-child(3) { left: 60%; top: 15%; width: 40%; height: 35%; background: radial-gradient(closest-side, rgba(170, 110, 255, .45), transparent); animation-duration: 22s; animation-delay: -12s; }
+@keyframes aurora {
+  from { transform: translateX(-6%) skewX(-12deg) scaleY(.8); }
+  to   { transform: translateX(8%) skewX(10deg) scaleY(1.2); }
+}
+@media (prefers-reduced-motion: reduce) { .aurora span { animation: none; } }
