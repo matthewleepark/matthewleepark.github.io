@@ -1,252 +1,198 @@
-// script.js: builds the pocha menu from CARDS (in cards.js) and runs the interactions.
-// To update an artifact, edit cards.js only. Nothing here needs to change.
+// script.js: builds the artifact cards from CARDS (cards.js) and runs the effects.
+// To update an artifact, edit cards.js only. Nothing in this file needs to change.
 
 const root = document.documentElement;
 const reduceMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
-const canHover = matchMedia("(hover: hover) and (pointer: fine)").matches;
+const finePointer = matchMedia("(hover: hover) and (pointer: fine)").matches;
+const isLight = () => root.dataset.theme === "light";
+const pad = n => String(n).padStart(2, "0");
 
-/* ---------- Small helpers ---------- */
 function make(tag, className, text) {
   const node = document.createElement(tag);
   if (className) node.className = className;
   if (text != null) node.textContent = text;
   return node;
 }
-function safeGet(key) {
-  try { return localStorage.getItem(key); } catch (e) { return null; }
-}
-function safeSet(key, value) {
-  try { localStorage.setItem(key, value); } catch (e) { /* storage blocked */ }
-}
-function price(number) {
-  return "₩" + (number * 10000).toLocaleString("en-US");
-}
-function dishName(card) {
-  // Show "Schedule Viewer" instead of "Idea: Schedule Viewer" (cards.js stays the same)
-  return card.title.replace(/^Idea:\s*/i, "");
-}
 
-const STATUS = {
-  done: { label: "Special Dish", pill: "완료 · Served" },
-  idea: { label: "Upcoming Dish", pill: "준비중 · Coming soon" }
-};
-function statusOf(card) {
-  return STATUS[card.status] || STATUS.idea;
-}
-
-/* ---------- Sound (off until the visitor turns it on) ---------- */
-let soundOn = safeGet("pocha-sound") === "on";
-let audioCtx = null;
-let lastSizzle = 0;
-
-function audio() {
-  if (!audioCtx) {
-    const AC = window.AudioContext || window.webkitAudioContext;
-    if (!AC) return null;
-    audioCtx = new AC();
-  }
-  if (audioCtx.state === "suspended") audioCtx.resume();
-  return audioCtx;
-}
-
-function sizzle() {
-  if (!soundOn) return;
-  const now = performance.now();
-  if (now - lastSizzle < 350) return;
-  lastSizzle = now;
-  const ac = audio();
-  if (!ac) return;
-
-  const length = Math.floor(ac.sampleRate * 0.45);
-  const buffer = ac.createBuffer(1, length, ac.sampleRate);
-  const data = buffer.getChannelData(0);
-  for (let i = 0; i < length; i++) {
-    data[i] = (Math.random() * 2 - 1) * (Math.random() < 0.12 ? 1 : 0.3); // crackly noise
-  }
-  const source = ac.createBufferSource();
-  source.buffer = buffer;
-  const filter = ac.createBiquadFilter();
-  filter.type = "highpass";
-  filter.frequency.value = 2500;
-  const gain = ac.createGain();
-  const t = ac.currentTime;
-  gain.gain.setValueAtTime(0.0001, t);
-  gain.gain.exponentialRampToValueAtTime(0.07, t + 0.03);
-  gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.45);
-  source.connect(filter).connect(gain).connect(ac.destination);
-  source.start(t);
-}
-
-function ding() {
-  if (!soundOn) return;
-  const ac = audio();
-  if (!ac) return;
-  [[988, 0], [740, 0.22]].forEach(([freq, start]) => {
-    const osc = ac.createOscillator();
-    const gain = ac.createGain();
-    const t = ac.currentTime + start;
-    osc.type = "sine";
-    osc.frequency.value = freq;
-    gain.gain.setValueAtTime(0.0001, t);
-    gain.gain.exponentialRampToValueAtTime(0.2, t + 0.02);
-    gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.8);
-    osc.connect(gain).connect(ac.destination);
-    osc.start(t);
-    osc.stop(t + 0.85);
-  });
-}
-
-const soundButton = document.getElementById("sound-toggle");
-function renderSound() {
-  soundButton.setAttribute("aria-pressed", String(soundOn));
-  soundButton.textContent = soundOn ? "🔊 Sizzle sounds on" : "🔈 Sizzle sounds off";
-}
-soundButton.addEventListener("click", () => {
-  soundOn = !soundOn;
-  safeSet("pocha-sound", soundOn ? "on" : "off");
-  renderSound();
-  if (soundOn) ding();
-});
-renderSound();
-
-/* ---------- Build the dish cards ---------- */
+/* ---------- 1. Artifact cards ---------- */
 const container = document.getElementById("cards");
 
 CARDS.forEach((card, i) => {
-  const info = statusOf(card);
-
   const el = make("article", "dish " + card.status);
-  el.dataset.status = card.status;
   el.style.setProperty("--i", i);
 
-  // steam (shows on hover)
-  const steam = make("span", "steam");
-  steam.setAttribute("aria-hidden", "true");
-  steam.append(make("span"), make("span"), make("span"));
+  const thumb = make("span", "thumb", pad(card.number));
+  thumb.setAttribute("aria-hidden", "true");
 
-  // label + price tag
-  const top = make("div", "dish-top");
-  const labelWrap = make("div");
-  labelWrap.append(make("span", "dish-label", info.label + " #" + card.number));
-  if (card.status === "done") labelWrap.append(make("span", "chef-pick", "셰프 추천 Chef’s pick"));
-  const tag = make("span", "price-tag");
-  tag.append(make("span", "price", price(card.number)), make("span", "price-sub", "Artifact " + card.number));
-  top.append(labelWrap, tag);
-
-  // dish name (the button makes the whole card clickable)
-  const name = make("h3", "dish-name");
-  const open = make("button", "dish-open", dishName(card));
+  const text = make("div", "dish-text");
+  const title = make("h3");
+  const open = make("button", "dish-open", card.title);
   open.type = "button";
   open.setAttribute("aria-haspopup", "dialog");
-  name.append(open);
+  open.addEventListener("click", () => openModal(card));
+  title.append(open);
 
-  const desc = make("p", "dish-desc", card.description);
+  const meta = make("p", "dish-meta", "— Artifact " + card.number + " ");
+  meta.append(make("span", null, card.status === "done" ? "Done" : "Idea"));
 
-  const foot = make("div", "dish-foot");
-  foot.append(make("span", "status-pill " + card.status, info.pill));
-  const cta = make("span", "dish-cta", "View order →");
-  cta.setAttribute("aria-hidden", "true");
-  foot.append(cta);
-
-  el.append(steam, top, name, desc, foot);
-  open.addEventListener("click", () => openOrder(card));
-
-  // hover: sizzle sound + tilt toward the mouse
-  if (canHover) {
-    el.addEventListener("mouseenter", () => {
-      sizzle();
-      if (!reduceMotion) el.classList.add("tilting");
-    });
-    if (!reduceMotion) {
-      el.addEventListener("mousemove", e => {
-        const r = el.getBoundingClientRect();
-        const x = (e.clientX - r.left) / r.width - 0.5;
-        const y = (e.clientY - r.top) / r.height - 0.5;
-        el.style.setProperty("--ry", x * 8 + "deg");
-        el.style.setProperty("--rx", -y * 8 + "deg");
-      });
-    }
-    el.addEventListener("mouseleave", () => {
-      el.classList.remove("tilting");
-      el.style.setProperty("--rx", "0deg");
-      el.style.setProperty("--ry", "0deg");
-    });
-  }
-
+  text.append(title, meta);
+  el.append(thumb, text);
   container.append(el);
 });
 
-/* ---------- Category filters ---------- */
-const filterButtons = document.querySelectorAll(".filter");
-const menuStatus = document.getElementById("menu-status");
+/* ---------- 2. Details modal ---------- */
+const modal = document.getElementById("modal");
+const modalLink = document.getElementById("modal-link");
+const modalPending = document.getElementById("modal-pending");
+const modalReflection = document.getElementById("modal-reflection");
 
-filterButtons.forEach(button => {
-  const filter = button.dataset.filter;
-  const count = filter === "all" ? CARDS.length : CARDS.filter(c => c.status === filter).length;
-  button.querySelector(".count").textContent = count;
-
-  button.addEventListener("click", () => {
-    filterButtons.forEach(b => b.setAttribute("aria-pressed", String(b === button)));
-    let shown = 0;
-    container.querySelectorAll(".dish").forEach((dish, i) => {
-      const visible = filter === "all" || dish.dataset.status === filter;
-      dish.hidden = !visible;
-      if (visible) dish.style.setProperty("--i", shown++);
-    });
-    menuStatus.textContent = "Showing " + shown + (shown === 1 ? " dish" : " dishes");
-  });
-});
-
-/* ---------- Order ticket (modal) ---------- */
-const order = document.getElementById("order");
-const orderLink = document.getElementById("order-link");
-const orderNoLink = document.getElementById("order-nolink");
-const orderReview = document.getElementById("order-review");
-
-function openOrder(card) {
-  const info = statusOf(card);
-  order.dataset.status = card.status;
-  document.getElementById("order-label").textContent = info.label + " #" + card.number;
-  document.getElementById("order-title").textContent = dishName(card);
-  document.getElementById("order-price").textContent = price(card.number);
-  document.getElementById("order-artifact").textContent = "Artifact " + card.number;
-  const pill = document.getElementById("order-status");
-  pill.className = "status-pill " + card.status;
-  pill.textContent = info.pill;
-  document.getElementById("order-desc").textContent = card.description;
+function openModal(card) {
+  document.getElementById("modal-badge").textContent =
+    "Artifact " + card.number + (card.status === "idea" ? " · idea" : " · done");
+  document.getElementById("modal-title").textContent = card.title;
+  document.getElementById("modal-desc").textContent = card.description;
 
   if (card.reflection) {
-    orderReview.textContent = card.reflection;
-    orderReview.classList.remove("empty");
+    modalReflection.textContent = card.reflection;
+    modalReflection.classList.remove("empty");
   } else {
-    orderReview.textContent = "The chef is still cooking this one. A review comes out when the dish is served.";
-    orderReview.classList.add("empty");
+    modalReflection.textContent = "The reflection gets added when this artifact is finished.";
+    modalReflection.classList.add("empty");
   }
 
-  if (card.link) {
-    orderLink.href = card.link;
-    orderLink.hidden = false;
-    orderNoLink.hidden = true;
-  } else {
-    orderLink.hidden = true;
-    orderNoLink.hidden = false;
+  modalLink.hidden = !card.link;
+  modalPending.hidden = !!card.link;
+  if (card.link) modalLink.href = card.link;
+
+  modal.classList.remove("closing");
+  if (typeof modal.showModal === "function") modal.showModal();
+  else modal.setAttribute("open", "");
+}
+
+function closeModal() {
+  if (!modal.open) return;
+  const finish = () => {
+    modal.classList.remove("closing");
+    if (typeof modal.close === "function") modal.close();
+    else modal.removeAttribute("open");
+  };
+  if (reduceMotion) return finish();
+  modal.classList.add("closing");
+  modal.addEventListener("animationend", finish, { once: true });
+}
+modal.querySelectorAll("[data-close]").forEach(b => b.addEventListener("click", closeModal));
+modal.addEventListener("click", e => { if (e.target === modal) closeModal(); });   // click outside
+modal.addEventListener("cancel", e => { e.preventDefault(); closeModal(); });     // Escape key
+
+/* ---------- 3. Depth parallax: word, photo, and hangul move at different speeds ---------- */
+const hero = document.querySelector(".hero");
+if (finePointer && !reduceMotion) {
+  addEventListener("pointermove", e => {
+    hero.style.setProperty("--px", (e.clientX / innerWidth - 0.5).toFixed(3));
+    hero.style.setProperty("--py", (e.clientY / innerHeight - 0.5).toFixed(3));
+  }, { passive: true });
+}
+
+/* ---------- 4. Rising embers that scatter away from the cursor ---------- */
+const canvas = document.getElementById("embers");
+const ctx = canvas.getContext("2d");
+const pointer = { x: -9999, y: -9999 };
+let embers = [];
+let W = 0, H = 0;
+let running = !reduceMotion;
+
+function newEmber(fromBottom) {
+  return {
+    x: Math.random() * W,
+    y: fromBottom ? H + Math.random() * 40 : Math.random() * H,
+    vx: (Math.random() - 0.5) * 0.3,
+    vy: -(0.25 + Math.random() * 0.7),
+    r: 0.6 + Math.random() * 1.8,
+    life: 0.4 + Math.random() * 0.6,
+    flicker: Math.random() * Math.PI * 2
+  };
+}
+
+function resizeCanvas() {
+  const dpr = Math.min(window.devicePixelRatio || 1, 2);
+  W = innerWidth; H = innerHeight;
+  canvas.width = W * dpr; canvas.height = H * dpr;
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  embers = Array.from({ length: Math.min(90, Math.floor(W / 16)) }, () => newEmber(false));
+  if (!running) drawEmbers(0);
+}
+
+function drawEmbers(t) {
+  ctx.clearRect(0, 0, W, H);
+  const light = isLight();
+  for (const e of embers) {
+    if (running) {
+      const dx = e.x - pointer.x, dy = e.y - pointer.y;
+      const d = Math.hypot(dx, dy);
+      if (d < 120 && d > 0.1) {
+        const f = (1 - d / 120) * 0.6;
+        e.vx += (dx / d) * f;
+        e.vy += (dy / d) * f * 0.5;
+      }
+      e.vx *= 0.96;
+      e.vx += Math.sin(t / 900 + e.flicker) * 0.01;      // gentle sway
+      e.vy += (-(0.25 + e.r * 0.25) - e.vy) * 0.03;      // keep rising
+      e.x += e.vx; e.y += e.vy;
+      if (e.y < -20 || e.x < -40 || e.x > W + 40) Object.assign(e, newEmber(true));
+    }
+    const glow = 0.55 + 0.45 * Math.sin(t / 180 + e.flicker);
+    const fade = Math.min(1, e.y / (H * 0.9));            // dim as they rise
+    const alpha = e.life * glow * fade * (light ? 0.5 : 0.9);
+    ctx.beginPath();
+    ctx.arc(e.x, e.y, e.r, 0, Math.PI * 2);
+    ctx.fillStyle = `rgba(255, ${110 + (e.r * 40) | 0}, 70, ${alpha})`;
+    ctx.shadowColor = "rgba(255, 70, 50, .9)";
+    ctx.shadowBlur = light ? 0 : 8;
+    ctx.fill();
   }
-
-  if (typeof order.showModal === "function") order.showModal();
-  else order.setAttribute("open", "");
-  ding();
+  ctx.shadowBlur = 0;
 }
 
-function closeOrder() {
-  if (typeof order.close === "function") order.close();
-  else order.removeAttribute("open");
+function loop(t) {
+  if (!running) return;
+  drawEmbers(t);
+  requestAnimationFrame(loop);
 }
-order.querySelectorAll("[data-close]").forEach(b => b.addEventListener("click", closeOrder));
-// clicking the dark area outside the ticket closes it
-order.addEventListener("click", e => { if (e.target === order) closeOrder(); });
 
-/* ---------- Theme toggle (remembers choice; dark pocha is the default) ---------- */
-document.getElementById("theme-toggle").addEventListener("click", () => {
-  root.dataset.theme = root.dataset.theme === "light" ? "dark" : "light";
-  safeSet("theme", root.dataset.theme);
+addEventListener("pointermove", e => { pointer.x = e.clientX; pointer.y = e.clientY; }, { passive: true });
+document.addEventListener("pointerleave", () => { pointer.x = pointer.y = -9999; });
+addEventListener("resize", resizeCanvas);
+document.addEventListener("visibilitychange", () => {
+  if (reduceMotion) return;
+  running = !document.hidden;
+  if (running) requestAnimationFrame(loop);
 });
+resizeCanvas();
+if (running) requestAnimationFrame(loop);
+
+/* ---------- 5. Theme toggle (dark is default) with a circular wave ---------- */
+const toggle = document.getElementById("theme-toggle");
+const themeName = toggle.querySelector(".theme-name");
+const renderThemeName = () => { themeName.textContent = isLight() ? "Light" : "Dark"; };
+
+function applyTheme() {
+  root.dataset.theme = isLight() ? "dark" : "light";
+  try { localStorage.setItem("theme", root.dataset.theme); } catch (e) { /* storage blocked */ }
+  renderThemeName();
+  if (!running) drawEmbers(0);
+}
+
+toggle.addEventListener("click", () => {
+  if (!document.startViewTransition || reduceMotion) { applyTheme(); return; }
+  const r = toggle.getBoundingClientRect();
+  const x = r.left + r.width / 2, y = r.top + r.height / 2;
+  const radius = Math.hypot(Math.max(x, innerWidth - x), Math.max(y, innerHeight - y));
+  const transition = document.startViewTransition(applyTheme);
+  transition.ready.then(() => {
+    root.animate(
+      { clipPath: [`circle(0px at ${x}px ${y}px)`, `circle(${radius}px at ${x}px ${y}px)`] },
+      { duration: 700, easing: "cubic-bezier(.65, 0, .35, 1)", pseudoElement: "::view-transition-new(root)" }
+    );
+  });
+});
+renderThemeName();
