@@ -10,84 +10,84 @@
   </script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=IBM+Plex+Sans+KR:wght@400;600;700&display=swap">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gloock&family=Manrope:wght@400;500;600;700&display=swap">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@900&text=%EB%A7%A4%ED%8A%9C%20%EB%B0%95&display=swap">
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <header class="site-header">
-    <button id="theme-toggle" aria-label="Toggle light and dark mode">◐</button>
+  <canvas id="embers" aria-hidden="true"></canvas>
 
-    <div class="lanterns" aria-hidden="true">
-      <span></span><span></span><span></span><span></span><span></span>
-    </div>
+  <div class="page">
+    <header class="topbar">
+      <a class="brand" href="#top" aria-label="Matthew Park, back to top">
+        <span class="brand-mark" aria-hidden="true">M</span>
+        <span class="brand-name">MATTHEW PARK</span>
+      </a>
+      <nav>
+        <a href="https://github.com/matthewleepark">GitHub</a>
+        <a href="https://www.linkedin.com/in/matthewlpark">LinkedIn</a>
+        <a href="mailto:leepark@uw.edu">Email</a>
+      </nav>
+      <button id="theme-toggle" type="button" aria-label="Toggle light and dark mode">◐ <span class="theme-name">Dark</span></button>
+    </header>
 
-    <div class="sign">
-      <p class="sign-ko" lang="ko">매튜의 포차</p>
-      <h1 class="sign-title">
-        <span class="sr-only">Matthew Park: Matthew's Pocha</span>
-        <span aria-hidden="true">MATTHEW’S POCH<span class="buzz">A</span></span>
-      </h1>
-      <p class="sign-sub">Matthew Park’s Project Menu <span lang="ko">프로젝트 메뉴</span></p>
-    </div>
+    <main class="hero" id="top">
+      <p class="eyebrow">Computer Science · UW · Class of 2027</p>
 
-    <p class="tagline">CS student at UW, class of 2027. Learning to build software with AI.</p>
-    <nav>
-      <a href="https://github.com/matthewleepark">GitHub</a>
-      <a href="https://www.linkedin.com/in/matthewlpark">LinkedIn</a>
-      <a href="mailto:leepark@uw.edu">Email</a>
-    </nav>
-  </header>
+      <div class="stage">
+        <h1 class="giant">
+          <span class="sr-only">Matthew Park</span>
+          <span class="giant-word" aria-hidden="true">PARK</span>
+        </h1>
+        <span class="hangul" lang="ko" aria-hidden="true">매튜 박</span>
+      </div>
 
-  <main>
-    <section class="about">
-      <h2>About <span class="ko" lang="ko">셰프 소개</span></h2>
-      <p>
-        I'm a computer science student at UW, graduating in June 2027.
-        I'm aiming for a software developer role. This site holds the five
-        projects I'm building for TCSS 490, Generative AI and Software Development.
-      </p>
-    </section>
+      <!-- Your cutout photo: save a PNG with a transparent background as me.png in the repo.
+           If me.png is missing, this is hidden automatically. -->
+      <figure class="portrait">
+        <img src="me.png" alt="Matthew Park" onerror="this.parentElement.hidden = true">
+      </figure>
 
-    <section class="menu" aria-labelledby="menu-heading">
-      <h2 id="menu-heading">TCSS 490 Artifacts <span class="ko" lang="ko">오늘의 메뉴</span></h2>
-
-      <div class="menu-toolbar">
-        <div class="filters" role="group" aria-label="Filter dishes">
-          <button class="filter" type="button" data-filter="all" aria-pressed="true">All dishes<span class="count"></span></button>
-          <button class="filter" type="button" data-filter="done" aria-pressed="false">Served<span class="count"></span></button>
-          <button class="filter" type="button" data-filter="idea" aria-pressed="false">Chef’s specials (ideas)<span class="count"></span></button>
+      <div class="hero-row">
+        <div class="cta">
+          <a class="btn-explore" href="#artifacts">View artifacts <span class="arrow" aria-hidden="true">↗</span></a>
+          <span class="cta-rule" aria-hidden="true"></span>
+          <a class="btn-text" href="mailto:leepark@uw.edu">Contact me</a>
         </div>
-        <button id="sound-toggle" class="sound-toggle" type="button" aria-pressed="false">🔈 Sizzle sounds off</button>
-      </div>
-      <p id="menu-status" class="sr-only" aria-live="polite"></p>
 
-      <div id="cards" class="grid"></div>
-    </section>
-  </main>
-
-  <footer>TCSS 490 · Autumn 2026</footer>
-
-  <!-- Order ticket: filled in by script.js when you click a dish -->
-  <dialog id="order" class="order" aria-labelledby="order-title">
-    <div class="order-inner">
-      <div class="order-head">
-        <span><span lang="ko">주문서</span> Order ticket</span>
-        <button type="button" class="order-x" data-close aria-label="Close order ticket">✕</button>
+        <section class="intro" aria-labelledby="about-heading">
+          <p class="tagline">CS student at UW, class of 2027. Learning to build software with AI.</p>
+          <h2 id="about-heading" class="label">About</h2>
+          <p class="about-text">
+            I'm a computer science student at UW, graduating in June 2027.
+            I'm aiming for a software developer role. This site holds the five
+            projects I'm building for TCSS 490, Generative AI and Software Development.
+          </p>
+        </section>
       </div>
-      <p id="order-label" class="order-label"></p>
-      <h3 id="order-title"></h3>
-      <div class="order-meta">
-        <span class="price-tag"><span id="order-price" class="price"></span><span id="order-artifact" class="price-sub"></span></span>
-        <span id="order-status" class="status-pill"></span>
-      </div>
-      <p class="order-section">What it is</p>
-      <p id="order-desc" class="order-desc"></p>
-      <p class="order-section">Chef’s review</p>
-      <p id="order-review" class="order-review"></p>
-      <div class="order-actions">
-        <button type="button" class="btn btn-ghost" data-close>Back to menu</button>
-        <a id="order-link" class="btn btn-primary" href="#">Open artifact</a>
-        <span id="order-nolink" class="btn btn-disabled">Not served yet</span>
+
+      <section class="artifacts" id="artifacts" aria-labelledby="artifacts-heading">
+        <h2 id="artifacts-heading" class="label">TCSS 490 Artifacts</h2>
+        <div id="cards" class="dish-row"></div>
+      </section>
+    </main>
+
+    <footer>TCSS 490 · Autumn 2026</footer>
+  </div>
+
+  <!-- Artifact details: filled in by script.js when a card is clicked -->
+  <dialog id="modal" class="modal" aria-labelledby="modal-title">
+    <div class="modal-inner">
+      <button type="button" class="modal-close" data-close aria-label="Close details">✕</button>
+      <p id="modal-badge" class="eyebrow"></p>
+      <h3 id="modal-title"></h3>
+      <p id="modal-desc" class="modal-desc"></p>
+      <h4 class="label">Reflection</h4>
+      <p id="modal-reflection" class="modal-reflection"></p>
+      <div class="modal-actions">
+        <button type="button" class="btn-ghost" data-close>Close</button>
+        <a id="modal-link" class="btn-explore" href="#">View artifact <span class="arrow" aria-hidden="true">↗</span></a>
+        <span id="modal-pending" class="btn-pending">Not built yet</span>
       </div>
     </div>
   </dialog>
@@ -95,5 +95,4 @@
   <script src="cards.js"></script>
   <script src="script.js"></script>
 </body>
-</html>
 </html>
