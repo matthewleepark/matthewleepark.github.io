@@ -29,6 +29,7 @@ Tool: Claude (chat). Date: 2026-10-08
 - Reworked light mode into a moonlit scene inspired by an Orbite landing page: slate-blue sky, white moon, snow on the mountains, moonlight on the lake.
 - Moved About to the right side with a stats row (1/5 artifacts done, 2027, UW) and the two buttons, and made my tagline a big headline on the left.
 - Added a hidden game (game.js): after the "park" easter egg shatters the page, you fall into the "Slice Dimension," a Fruit Ninja–style game where the letters of my name and mini artifact cards fly up to be sliced. It has golden slow-motion letters, a P-A-R-K bonus, combos, ERR orbs to avoid, 3 lives, a saved best score, and sound. Returning drops you back on the site.
+- Fixed the extra PARK still showing behind sliced letters (also for Safari) and added version tags to the file links in index.html so browsers always load the newest files. Added the missing game.js line.
 
 ## Issues
 
