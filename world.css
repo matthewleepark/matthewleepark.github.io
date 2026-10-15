@@ -1,6 +1,9 @@
 @import url("https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@900&text=%EC%9D%BC%EC%84%AC&display=swap");
 
-/* world.css: type "park"
+/* world.css: the "other dimension" you enter after the sword cut.
+   A blue night landscape with your name tucked behind the mountains,
+   a blade cursor trail, and the "park" easter egg.
+   Remove its <link> in index.html to undo. */
 
 /* ---------- Blue world colors ---------- */
 :root.world:not([data-theme="light"]) {
@@ -255,6 +258,8 @@ html.aurora-on:root.world[data-theme="light"] .aurora { opacity: .4; }
 .giant-word .ltr:nth-child(4) { animation-delay: 2.05s; }
 .giant-word .ltr:nth-child(5) { animation-delay: 2.2s; }
 .giant-word .ltr:nth-child(6) { animation-delay: 2.35s; }
+/* while a letter is being sliced, hide the whole letter so only the two halves show */
+.giant-word .ltr.sliced { background: none; }
 @keyframes world-sheen { 0% { background-position: 100% 0; } 55%, 100% { background-position: 0% 0; } }
 
 /* top bar stays at the top while you scroll */
