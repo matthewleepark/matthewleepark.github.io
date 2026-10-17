@@ -9,10 +9,10 @@ const CARDS = [
   },
   {
     number: 2,
-    title: "Idea: Schedule Viewer",
-    status: "idea",
-    link: "",
-    description: "A tool that shows my classes and work shifts in one weekly view.",
+    title: "verse-ai",
+    status: "done",
+    link: "https://github.com/matthewleepark/verse-ai",
+    description: "An offline daily Bible verse study app in Python, with an animated browser poster.",
     reflection: ""
   },
   {
