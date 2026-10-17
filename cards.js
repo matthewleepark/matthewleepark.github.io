@@ -5,7 +5,7 @@ const CARDS = [
     status: "done",
     link: "https://matthewleepark.github.io",
     description: "A static site that holds all five TCSS 490 artifacts.",
-    reflection: "I built this with Claude and had to check what it added about me. Usage limits made me plan my prompts ahead."
+    reflection: "I built this with Claude and spent a lot of time adding, changing, and refining features to get the site closer to what I envisioned. I learned that AI doesn't always understand exactly what I'm going for, so I had to be specific with my prompts and review what it added, especially when it came to personal details about me. Usage limits also pushed me to think ahead and make each prompt count."
   },
   {
     number: 2,
@@ -13,7 +13,7 @@ const CARDS = [
     status: "done",
     link: "https://github.com/matthewleepark/verse-ai",
     description: "An offline daily Bible verse study app in Python, with an animated browser poster.",
-    reflection: "Since I have Claude Pro, I've had a lot of fun exploring and testing what Claude can do. I've mostly found success, but sometimes Claude thinks it's doing everything correctly, and that's when I have to jump in and tell it to adjust or tailor its work. I tried different models like Opus 5.5, Sonnet, and Haiku. It was really fun, but this session taught me that adjusting and tailoring what Claude is doing takes time."
+    reflection: "Since I have Claude Pro, I've had a lot of fun exploring and testing what Claude can do. For the most part, things went well, but I learned that Claude doesn't always get everything right on the first try. Sometimes, I have to step in, explain what needs to change, and help tailor the results to what I'm actually looking for. I also got to experiment with different models, including Opus 5.5, Sonnet, and Haiku. Overall, it was a fun learning experience, and it taught me that building something with AI still takes time, patience, and a lot of back-and-forth to get the results I want."
   },
   {
     number: 3,
