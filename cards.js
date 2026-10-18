@@ -9,9 +9,9 @@ const CARDS = [
   },
   {
     number: 2,
-    title: "verse-ai",
+    title: "daily-bread",
     status: "done",
-    link: "https://github.com/matthewleepark/verse-ai",
+    link: "https://github.com/matthewleepark/daily-bread",
     description: "An offline daily Bible verse study app in Python, with an animated browser poster.",
     reflection: "Since I have Claude Pro, I've had a lot of fun exploring and testing what Claude can do. For the most part, things went well, but I learned that Claude doesn't always get everything right on the first try. Sometimes, I have to step in, explain what needs to change, and help tailor the results to what I'm actually looking for. I also got to experiment with different models, including Opus 5.5, Sonnet, and Haiku. Overall, it was a fun learning experience, and it taught me that building something with AI still takes time, patience, and a lot of back-and-forth to get the results I want."
   },
