@@ -43,6 +43,8 @@ CARDS.forEach((card, i) => {
 /* ---------- 2. Details modal ---------- */
 const modal = document.getElementById("modal");
 const modalLink = document.getElementById("modal-link");
+const modalLinkText = document.getElementById("modal-link-text");
+const modalApp = document.getElementById("modal-app");
 const modalPending = document.getElementById("modal-pending");
 const modalReflection = document.getElementById("modal-reflection");
 
@@ -63,6 +65,14 @@ function openModal(card) {
   modalLink.hidden = !card.link;
   modalPending.hidden = !!card.link;
   if (card.link) modalLink.href = card.link;
+
+  // Cards with a live app show two bubbles: "Open app" and "View repo".
+  modalApp.hidden = !card.app;
+  if (card.app) modalApp.href = card.app;
+  modalLink.classList.toggle("secondary", !!card.app);
+  modalLinkText.textContent = card.app ? "View repo" : "View artifact";
+  if (card.app) { modalLink.target = "_blank"; modalLink.rel = "noopener"; }
+  else { modalLink.removeAttribute("target"); modalLink.removeAttribute("rel"); }
 
   modal.classList.remove("closing");
   if (typeof modal.showModal === "function") modal.showModal();
