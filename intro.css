@@ -272,8 +272,3 @@ html.gate-playing .page * { animation-play-state: paused !important; }
 @media (max-width: 960px) {
   .hud-strip .ticks, .callout, .dot-nav, .rings { display: none !important; }
 }
-@media (prefers-reduced-motion: reduce) {
-  .portrait.is-figure img { animation: none; }
-  .gate-enter::before { animation: none; }
-  .gate-name { animation: none; }
-}

@@ -3,7 +3,7 @@
 // Remove its <script> tag in index.html to undo.
 (() => {
   const root = document.documentElement;
-  const reduceMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const reduceMotion = false;   // effects always play, even with the system "Reduce motion" setting on (by design)
   const finePointer = matchMedia("(hover: hover) and (pointer: fine)").matches;
   const SVG = "http://www.w3.org/2000/svg";
 

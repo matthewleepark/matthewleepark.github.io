@@ -1,7 +1,7 @@
 
 (() => {
   const root = document.documentElement;
-  const reduceMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const reduceMotion = false;   // effects always play, even with the system "Reduce motion" setting on (by design)
 
   // Set to true to show the front page only the first time someone opens the site in a tab
   const SHOW_ONCE_PER_VISIT = false;

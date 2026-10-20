@@ -166,10 +166,6 @@ html.world-entering .world-bg { animation: world-in 1.6s cubic-bezier(.2, .8, .2
 /* ---------- Blade cursor trail ---------- */
 .blade-trail { position: fixed; inset: 0; width: 100%; height: 100%; z-index: 60; pointer-events: none; }
 
-@media (prefers-reduced-motion: reduce) {
-  .world-bg .tw, .world-bg .shimmer, .shooting-star { animation: none; }
-  html.world-entering .world-bg, .world-ridge { animation: none; }
-}
 
 /* ==========================================================
    Easter egg: 일섬 (Isseom, "one flash")
@@ -239,7 +235,6 @@ html.aurora-on:root.world[data-theme="light"] .aurora { opacity: .4; }
   from { transform: translateX(-6%) skewX(-12deg) scaleY(.8); }
   to   { transform: translateX(8%) skewX(10deg) scaleY(1.2); }
 }
-@media (prefers-reduced-motion: reduce) { .aurora span { animation: none; } }
 
 /* ==========================================================
    Shiny name, sticky top bar, back button, hero layout
@@ -328,7 +323,4 @@ html.world .intro .btn-text:hover { border-color: var(--fg); background: var(--g
 @media (max-width: 520px) {
   .back-label { display: none; }
   .hero-stats { gap: 1.4rem; }
-}
-@media (prefers-reduced-motion: reduce) {
-  .giant-word .ltr { animation: none; }
 }

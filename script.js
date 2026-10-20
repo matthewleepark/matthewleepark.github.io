@@ -2,7 +2,7 @@
 // To update an artifact, edit cards.js only. Nothing in this file needs to change.
 
 const root = document.documentElement;
-const reduceMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
+const reduceMotion = false;   // effects always play, even with the system "Reduce motion" setting on (by design)
 const finePointer = matchMedia("(hover: hover) and (pointer: fine)").matches;
 const isLight = () => root.dataset.theme === "light";
 const pad = n => String(n).padStart(2, "0");
