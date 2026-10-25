@@ -18,11 +18,11 @@ const CARDS = [
   },
   {
     number: 3,
-    title: "Idea: Makerspace Hours Tracker",
-    status: "idea",
-    link: "",
-    description: "A small Mac app that tracks my Makerspace hours and shows how many I have left each week.",
-    reflection: ""
+    title: "MyFile",
+    status: "done",
+    link: "https://matthewleepark.github.io/myfile/",
+    description: "A desktop file utility where Claude reads your documents and plain code checks everything it says.",
+    reflection: "For this artifact I built MyFile, a desktop app where you drop in a file and get the actions that make sense for it, with Claude reading documents through Claude Code in headless mode. The biggest thing I learned was deciding what the model should do and what plain code should check: Claude reads and summarizes, but my own code checks every quote it gives against the real document, asks permission before anything is sent, and only lets it pick from a fixed list of actions. I also built an evaluation with trap documents and a prompt injection, and it showed that Haiku matched Sonnet on my test set at about a tenth of the cost, which changed how I think about picking models. Having several AI reviewers try to break my code found real bugs I would have missed, like a request for one file running on a different file after a quick switch."
   },
   {
     number: 4,
