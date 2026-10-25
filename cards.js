@@ -21,7 +21,7 @@ const CARDS = [
     title: "MyFile",
     status: "done",
     link: "https://github.com/matthewleepark/myfile",
-    app: "https://matthewleepark.github.io/myfile/",
+    app: "https://matthewleepark.github.io/myfile/app/",
     description: "A desktop file converter: drop in a file and turn it into a PDF, JPG, MP3, and more, with AI that can pick the conversion for you.",
     reflection: "For this one I used Claude Code to build a real desktop app, which was a big step up from my last artifact. At first I kept asking for more and more features, and the app ended up being mostly about summarizing documents instead of what I actually wanted, which was a file converter. I had to step back, tell Claude what the app is really for, and have it clean everything up. I learned that the AI can build a lot really fast, but it's on me to keep the project focused. I also learned to have my code double-check what the AI says instead of just trusting it, and testing caught real bugs I wouldn't have noticed, like a date put in the wrong year. Overall, it taught me that planning what I want first saves a lot of time and back-and-forth."
   },

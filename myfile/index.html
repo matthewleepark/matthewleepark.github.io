@@ -30,6 +30,8 @@
   li + li { margin-top: 4px; }
   strong { color: var(--text); }
   a { color: var(--accent); }
+  .open-app { display: inline-block; padding: 10px 18px; border-radius: 999px; background: var(--accent); color: #0d1430; font-weight: 700; text-decoration: none; }
+  .note-inline { font-size: 14px; margin-left: 8px; }
   .log { display: flex; flex-direction: column; gap: 12px; margin-top: 12px; padding-top: 20px; border-top: 1px solid #2a3044; }
   .log h2 { font-size: 24px; }
   .log h3 { font-size: 17px; margin-top: 6px; }
@@ -41,6 +43,7 @@
   <span class="kicker">TCSS 490 · Artifact 3 · AI inside it</span>
   <h1>MyFile: convert any file</h1>
   <p>A Windows/macOS desktop app (Tauri 2, Rust, React). Drop a file in and it shows what it can become. Pick a format, or just describe what you need, and save the new copy. Your original file is never changed.</p>
+  <p><a class="open-app" href="app/">Try it in your browser ↗</a> <span class="note-inline">A browser version of the converter. Your file isn't uploaded.</span></p>
   <ul>
     <li><strong>What it converts:</strong> images (JPG, PNG, WebP, HEIC and more, or to PDF), PDF pages to images, Word/Excel/PowerPoint text, CSV/JSON/YAML/Excel, audio (MP3, WAV, M4A...), video (MP4, WebM, GIF, or just the audio), subtitles, and ZIP files.</li>
     <li><strong>The AI's job:</strong> turn a request like "small enough to email" into one of the conversions for that file, plus settings like quality and size. It runs on a free local model or Claude, and it only sees my words and the file type.</li>
