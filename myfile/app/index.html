@@ -3,78 +3,174 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="color-scheme" content="dark light">
+<meta name="color-scheme" content="dark">
 <title>MyFile · Convert in your browser</title>
-<meta name="description" content="Convert images, PDFs, documents, data files, spreadsheets, subtitles and audio right in your browser. Your file isn't uploaded.">
+<meta name="description" content="Convert images, PDFs, documents, data files, spreadsheets, subtitles and audio right in your browser, many files at once. Nothing is uploaded.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg: #15171c;
-    --surface: #1d2027;
-    --surface-2: #252932;
-    --border: #2e333d;
-    --border-strong: #3d4350;
-    --text: #e8eaee;
-    --text-2: #a5adb8;
+    --bg: #0b0d14;
+    --bg-2: #10131d;
+    --surface: #151926;
+    --surface-2: #1c2132;
+    --border: #262c40;
+    --border-strong: #353d57;
+    --text: #eef0f6;
+    --text-2: #a3abc2;
+    --text-3: #727b96;
     --accent: #7b9cff;
-    --accent-ink: #0d1430;
-    --success: #5fd08b;
-    --danger: #ff7b7b;
-    --radius: 12px;
-    --radius-sm: 8px;
-  }
-  @media (prefers-color-scheme: light) {
-    :root:not([data-theme="dark"]) {
-      --bg: #f5f6f8; --surface: #ffffff; --surface-2: #f0f2f5; --border: #e1e4ea; --border-strong: #cfd4dc;
-      --text: #1d2129; --text-2: #5b6472; --accent: #3a5ccc; --accent-ink: #ffffff; --success: #1f8a4c; --danger: #c43c3c;
-    }
+    --accent-2: #b48cff;
+    --accent-ink: #0b1030;
+    --success: #4fd18b;
+    --danger: #ff7d8a;
+    --radius: 16px;
+    --radius-sm: 10px;
+    --shadow: 0 20px 60px -20px rgba(0, 0, 0, .6);
   }
   * { box-sizing: border-box; }
-  body { margin: 0; min-height: 100vh; background: var(--bg); color: var(--text); font: 15px/1.55 "Segoe UI", -apple-system, system-ui, sans-serif; }
-  .topbar { display: flex; align-items: center; gap: 10px; padding: 14px 24px; border-bottom: 1px solid var(--border); }
-  .brand-mark { display: grid; place-items: center; width: 28px; height: 28px; border-radius: 8px; background: var(--accent); color: var(--accent-ink); font-weight: 800; }
-  .brand-name { font-weight: 700; font-size: 17px; }
-  .tag { font-size: 12px; color: var(--text-2); border: 1px solid var(--border-strong); border-radius: 999px; padding: 1px 8px; }
-  .topbar a { margin-left: auto; color: var(--text-2); font-size: 14px; }
-  main { max-width: 820px; margin: 0 auto; padding: 28px 16px 48px; display: flex; flex-direction: column; gap: 18px; }
-  .panel { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; }
-  .dropzone { border: 2px dashed var(--border-strong); border-radius: var(--radius); padding: 44px 20px; text-align: center; background: var(--surface); transition: border-color .15s, background .15s; }
-  .dropzone.is-dragging { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 8%, var(--surface)); }
-  .dropzone h1 { margin: 10px 0 4px; font-size: 22px; }
-  .muted { color: var(--text-2); }
-  .small { font-size: 13px; }
-  .btn { display: inline-block; text-decoration: none; font: inherit; font-weight: 600; border-radius: var(--radius-sm); padding: 8px 16px; cursor: pointer; border: 1px solid var(--border-strong); background: var(--surface); color: var(--text); }
-  .btn:disabled { opacity: .55; cursor: default; }
-  .btn-primary { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
-  .icon { width: 44px; height: 44px; display: inline-grid; place-items: center; border-radius: 12px; background: var(--surface-2); color: var(--accent); }
-  .file-card { display: flex; align-items: center; gap: 14px; }
-  .file-card .name { font-weight: 600; overflow-wrap: anywhere; }
-  .file-card .actions { margin-left: auto; display: flex; gap: 8px; }
-  .section-title { margin: 0 0 12px; font-size: 13px; letter-spacing: .05em; text-transform: uppercase; color: var(--text-2); }
-  .group { display: flex; flex-direction: column; gap: 6px; margin-bottom: 12px; }
-  .group-label { font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: .04em; color: var(--text-2); }
-  .grid { display: flex; flex-wrap: wrap; gap: 8px; }
-  .chip { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; min-width: 84px; padding: 8px 14px; font: inherit; color: var(--text); background: var(--surface); border: 1px solid var(--border-strong); border-radius: var(--radius-sm); cursor: pointer; text-align: left; }
-  .chip:hover { border-color: var(--accent); }
-  .chip[aria-checked="true"] { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 14%, var(--surface)); box-shadow: 0 0 0 1px var(--accent); }
-  .chip b { font-weight: 600; }
-  .chip span { font-size: 11px; color: var(--text-2); }
-  .settings { display: flex; flex-wrap: wrap; align-items: center; gap: 16px; margin-top: 6px; }
-  .settings label { display: flex; align-items: center; gap: 8px; }
-  select { font: inherit; color: var(--text); background: var(--surface-2); border: 1px solid var(--border-strong); border-radius: var(--radius-sm); padding: 5px 8px; }
-  .status { display: flex; align-items: center; gap: 10px; margin-top: 14px; }
-  .spinner { display: inline-block; box-sizing: border-box; width: 18px; height: 18px; flex: none; border: 2px solid var(--border-strong); border-top-color: var(--accent); border-radius: 50%; animation: spin .8s linear infinite; }
-  @keyframes spin { to { transform: rotate(360deg); } }
-  @media (prefers-reduced-motion: reduce) { .spinner { animation-duration: 2.4s; } }
-  .bar { height: 6px; border-radius: 999px; background: var(--border); overflow: hidden; flex: 1; max-width: 240px; }
-  .bar > span { display: block; height: 100%; width: 0; background: var(--accent); transition: width .2s; }
-  .result { display: flex; gap: 16px; align-items: flex-start; margin-top: 14px; padding: 12px; border: 1px solid var(--border); border-radius: var(--radius-sm); }
-  .result img { max-width: 160px; max-height: 160px; border-radius: var(--radius-sm); border: 1px solid var(--border); background: var(--surface-2); object-fit: contain; }
-  .ok { color: var(--success); font-weight: 600; }
-  .error { color: var(--danger); margin-top: 12px; }
-  .note { font-size: 13px; color: var(--text-2); }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0; min-height: 100vh; overflow-x: hidden; color: var(--text); background: var(--bg);
+    font: 15px/1.55 Inter, "Segoe UI", -apple-system, system-ui, sans-serif;
+    background-image:
+      radial-gradient(900px 500px at 15% -10%, rgba(123, 156, 255, .16), transparent 60%),
+      radial-gradient(700px 500px at 100% 10%, rgba(180, 140, 255, .12), transparent 60%);
+    background-attachment: fixed;
+  }
   a { color: var(--accent); }
   [hidden] { display: none !important; }
-  @media (max-width: 560px) { .file-card { flex-wrap: wrap; } .file-card .actions { margin-left: 0; } .result { flex-direction: column; } }
+
+  /* Top bar */
+  .topbar { position: sticky; top: 0; z-index: 10; display: flex; align-items: center; gap: 10px; padding: 12px clamp(16px, 4vw, 32px); background: rgba(11, 13, 20, .72); backdrop-filter: blur(14px); border-bottom: 1px solid var(--border); }
+  .brand-mark { display: grid; place-items: center; width: 30px; height: 30px; border-radius: 9px; background: linear-gradient(135deg, var(--accent), var(--accent-2)); color: var(--accent-ink); font-weight: 800; }
+  .brand-name { font-weight: 700; font-size: 17px; letter-spacing: -.01em; }
+  .tag { font-size: 12px; color: var(--text-2); border: 1px solid var(--border-strong); border-radius: 999px; padding: 2px 9px; }
+  .nav { margin-left: auto; display: flex; gap: 18px; font-size: 14px; }
+  .nav a { color: var(--text-2); text-decoration: none; }
+  .nav a:hover { color: var(--text); }
+
+  main { max-width: 980px; margin: 0 auto; padding: clamp(24px, 5vw, 56px) 16px 64px; }
+
+  /* Hero */
+  .hero { text-align: center; display: flex; flex-direction: column; align-items: center; gap: 14px; }
+  .eyebrow { font-size: 12px; font-weight: 700; letter-spacing: .16em; text-transform: uppercase; color: var(--accent); }
+  .hero h1 { margin: 0; font-size: clamp(34px, 6.4vw, 60px); line-height: 1.04; letter-spacing: -.035em; font-weight: 800; }
+  .grad { background: linear-gradient(90deg, var(--accent), var(--accent-2) 60%, #ff9ad5); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .hero p.lead { margin: 0; max-width: 620px; color: var(--text-2); font-size: clamp(15px, 2vw, 18px); }
+  .stats { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin-top: 4px; }
+  .stat { display: flex; align-items: center; gap: 8px; padding: 6px 12px; border: 1px solid var(--border); border-radius: 999px; background: rgba(21, 25, 38, .7); font-size: 13px; color: var(--text-2); }
+  .stat b { color: var(--text); }
+
+  /* Drop zone with a slowly turning gradient border */
+  @property --angle { syntax: "<angle>"; initial-value: 0deg; inherits: false; }
+  .dropzone {
+    position: relative; margin-top: 34px; width: 100%; padding: clamp(36px, 6vw, 56px) 20px; text-align: center; cursor: pointer;
+    border-radius: 22px; background: linear-gradient(var(--surface), var(--surface)) padding-box,
+      conic-gradient(from var(--angle), var(--border-strong), var(--accent), var(--accent-2), var(--border-strong) 40%, var(--border-strong)) border-box;
+    border: 2px solid transparent; box-shadow: var(--shadow); animation: turn 8s linear infinite; transition: transform .2s ease, box-shadow .2s ease;
+  }
+  @keyframes turn { to { --angle: 360deg; } }
+  .dropzone:hover { transform: translateY(-2px); }
+  .dropzone.is-dragging { transform: scale(1.015); box-shadow: 0 0 0 6px rgba(123, 156, 255, .18), var(--shadow); }
+  .drop-icon { display: inline-grid; place-items: center; width: 64px; height: 64px; border-radius: 18px; background: linear-gradient(135deg, rgba(123, 156, 255, .22), rgba(180, 140, 255, .22)); color: var(--accent); animation: bob 3s ease-in-out infinite; }
+  @keyframes bob { 50% { transform: translateY(-6px); } }
+  .dropzone h2 { margin: 16px 0 6px; font-size: 22px; letter-spacing: -.01em; }
+  .dropzone p { margin: 0 0 18px; color: var(--text-2); }
+
+  /* Scrolling format pills */
+  .marquee { position: relative; width: 100%; max-width: 100%; overflow: hidden; margin-top: 26px; mask-image: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent); }
+  .marquee-track { display: flex; gap: 10px; width: max-content; animation: scroll 38s linear infinite; }
+  .marquee:hover .marquee-track { animation-play-state: paused; }
+  @keyframes scroll { to { transform: translateX(-50%); } }
+  .pill { padding: 6px 12px; border-radius: 999px; border: 1px solid var(--border); background: var(--bg-2); color: var(--text-2); font-size: 13px; white-space: nowrap; }
+  .pill b { color: var(--text); font-weight: 600; }
+
+  /* Buttons */
+  .btn { display: inline-flex; align-items: center; gap: 8px; text-decoration: none; font: inherit; font-weight: 600; border-radius: 999px; padding: 10px 20px; cursor: pointer; border: 1px solid var(--border-strong); background: var(--surface-2); color: var(--text); transition: transform .15s, background .15s, border-color .15s; }
+  .btn:hover:not(:disabled) { transform: translateY(-1px); border-color: var(--accent); }
+  .btn:disabled { opacity: .5; cursor: default; }
+  .btn-primary { background: linear-gradient(135deg, var(--accent), var(--accent-2)); border-color: transparent; color: var(--accent-ink); }
+  .btn-small { padding: 6px 12px; font-size: 13px; }
+  .btn-icon { padding: 6px; border-radius: 8px; background: transparent; border-color: transparent; color: var(--text-3); }
+  .btn-icon:hover:not(:disabled) { color: var(--text); border-color: var(--border-strong); }
+
+  /* Features */
+  .features { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 14px; margin-top: 40px; }
+  .feature { padding: 18px; border: 1px solid var(--border); border-radius: var(--radius); background: rgba(21, 25, 38, .6); }
+  .feature h3 { margin: 10px 0 4px; font-size: 15px; }
+  .feature p { margin: 0; color: var(--text-2); font-size: 14px; }
+  .feature .ic { width: 36px; height: 36px; display: grid; place-items: center; border-radius: 10px; background: var(--surface-2); color: var(--accent); }
+
+  /* Workspace */
+  .workspace { display: flex; flex-direction: column; gap: 16px; }
+  .ws-head { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+  .ws-head h1 { margin: 0; font-size: 26px; letter-spacing: -.02em; }
+  .ws-head .spacer { flex: 1; }
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 18px; box-shadow: var(--shadow); }
+  .label { font-size: 12px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--text-3); margin: 0 0 10px; }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; }
+  .chip { display: flex; flex-direction: column; align-items: flex-start; min-width: 78px; padding: 8px 14px; font: inherit; color: var(--text); background: var(--bg-2); border: 1px solid var(--border-strong); border-radius: 12px; cursor: pointer; text-align: left; transition: border-color .15s, background .15s, transform .15s; }
+  .chip:hover { border-color: var(--accent); transform: translateY(-1px); }
+  .chip[aria-pressed="true"] { border-color: var(--accent); background: rgba(123, 156, 255, .14); box-shadow: 0 0 0 1px var(--accent); }
+  .chip b { font-weight: 600; }
+  .chip span { font-size: 11px; color: var(--text-2); }
+  .queue { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+  .row { display: grid; grid-template-columns: auto 1fr auto auto auto; align-items: center; gap: 14px; padding: 12px 14px; border: 1px solid var(--border); border-radius: 14px; background: var(--bg-2); animation: rise .35s cubic-bezier(.2, .8, .2, 1) both; }
+  @keyframes rise { from { opacity: 0; transform: translateY(10px); } }
+  .ficon { width: 42px; height: 42px; display: grid; place-items: center; border-radius: 12px; color: #fff; font-size: 11px; font-weight: 800; letter-spacing: .03em; }
+  .fam-image { background: linear-gradient(135deg, #3fb8ff, #6b7bff); }
+  .fam-pdf { background: linear-gradient(135deg, #ff6b6b, #e0457b); }
+  .fam-docx { background: linear-gradient(135deg, #4b8cff, #2f5bd8); }
+  .fam-text { background: linear-gradient(135deg, #9a8cff, #6b5bd8); }
+  .fam-table, .fam-sheet { background: linear-gradient(135deg, #3ccf91, #1f9f6a); }
+  .fam-data { background: linear-gradient(135deg, #ffb547, #ef8a2a); }
+  .fam-subs { background: linear-gradient(135deg, #8f9bb8, #5d6885); }
+  .fam-audio { background: linear-gradient(135deg, #ff7ac6, #c35bff); }
+  .fam-video { background: linear-gradient(135deg, #ff8a5b, #ff5b7a); }
+  .fam-none { background: var(--surface-2); color: var(--text-3); }
+  .rname { font-weight: 600; overflow-wrap: anywhere; line-height: 1.3; }
+  .rmeta { font-size: 13px; color: var(--text-3); }
+  .rstate { font-size: 13px; color: var(--text-2); min-width: 150px; text-align: right; }
+  .rstate .ok { color: var(--success); font-weight: 600; }
+  .rstate .err { color: var(--danger); }
+  select { font: inherit; font-size: 14px; color: var(--text); background: var(--surface-2); border: 1px solid var(--border-strong); border-radius: 10px; padding: 6px 10px; }
+  .bar { height: 6px; width: 140px; margin-left: auto; border-radius: 999px; background: var(--border); overflow: hidden; }
+  .bar > span { display: block; height: 100%; width: 0; background: linear-gradient(90deg, var(--accent), var(--accent-2)); transition: width .2s; }
+  .bar.indeterminate > span { width: 40%; animation: slide 1.1s ease-in-out infinite; }
+  @keyframes slide { from { transform: translateX(-100%); } to { transform: translateX(260%); } }
+  .pop { display: inline-block; animation: pop .35s cubic-bezier(.2, 1.6, .4, 1) both; }
+  @keyframes pop { from { transform: scale(.4); opacity: 0; } }
+  .settings { display: flex; flex-wrap: wrap; align-items: center; gap: 18px; }
+  .settings label { display: flex; align-items: center; gap: 8px; font-size: 14px; color: var(--text-2); }
+  input[type=range] { accent-color: var(--accent); }
+  .actions { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+  .actions .spacer { flex: 1; }
+  .summary { color: var(--text-2); font-size: 14px; }
+  .summary b { color: var(--success); }
+
+  /* Before / after */
+  .compare { position: relative; overflow: hidden; border-radius: 12px; border: 1px solid var(--border); background: repeating-conic-gradient(#1a1f2e 0% 25%, #141826 0% 50%) 50% / 20px 20px; user-select: none; touch-action: none; }
+  .compare img { display: block; width: 100%; height: auto; }
+  .compare .after { position: absolute; inset: 0; clip-path: inset(0 0 0 var(--split, 50%)); }
+  .compare .handle { position: absolute; top: 0; bottom: 0; left: var(--split, 50%); width: 2px; background: #fff; box-shadow: 0 0 12px rgba(0, 0, 0, .6); transform: translateX(-1px); }
+  .compare .handle::after { content: "\2194"; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 34px; height: 34px; display: grid; place-items: center; border-radius: 50%; background: #fff; color: #111; font-weight: 700; }
+  .compare .tagl, .compare .tagr { position: absolute; top: 10px; padding: 3px 9px; border-radius: 999px; background: rgba(0, 0, 0, .65); font-size: 12px; font-weight: 600; }
+  .compare .tagl { left: 10px; } .compare .tagr { right: 10px; }
+  .compare input { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; cursor: ew-resize; }
+
+  .footnote { margin-top: 32px; text-align: center; color: var(--text-3); font-size: 13px; }
+  .toast { position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%); padding: 10px 16px; border-radius: 999px; background: var(--surface-2); border: 1px solid var(--border-strong); box-shadow: var(--shadow); font-size: 14px; animation: rise .3s both; }
+
+  @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
+  @media (max-width: 720px) {
+    .row { grid-template-columns: auto 1fr auto; }
+    .row .rsel, .row .rstate { grid-column: 2 / -1; text-align: left; }
+    .rstate { min-width: 0; }
+    .bar { margin-left: 0; }
+    .nav { display: none; }
+  }
 </style>
 </head>
 <body>
@@ -82,58 +178,92 @@
   <span class="brand-mark" aria-hidden="true">M</span>
   <span class="brand-name">MyFile</span>
   <span class="tag">Browser version</span>
-  <a href="../">About MyFile</a>
+  <nav class="nav" aria-label="Links">
+    <a href="../">Desktop app</a>
+    <a href="https://github.com/matthewleepark/myfile" target="_blank" rel="noopener">GitHub</a>
+  </nav>
 </header>
 
 <main>
-  <section id="drop" class="dropzone" aria-label="Choose a file">
-    <div class="icon" aria-hidden="true">
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 16V4M7 9l5-5 5 5M5 20h14"/></svg>
+  <!-- Landing -->
+  <section id="landing">
+    <div class="hero">
+      <span class="eyebrow">MyFile · File converter</span>
+      <h1>Convert any file.<br><span class="grad">Right in your browser.</span></h1>
+      <p class="lead">Images, PDFs, documents, spreadsheets, data, subtitles and audio. Drop in as many files as you want. Nothing gets uploaded; it all happens on your device.</p>
+      <div class="stats">
+        <span class="stat"><b>60+</b> conversions</span>
+        <span class="stat"><b>0</b> uploads</span>
+        <span class="stat"><b>Batch</b> convert</span>
+        <span class="stat"><b>No</b> sign-up</span>
+      </div>
+      <div class="dropzone" id="drop" role="button" tabindex="0" aria-label="Choose files to convert">
+        <div class="drop-icon" aria-hidden="true">
+          <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 16V4M7 9l5-5 5 5M5 20h14"/></svg>
+        </div>
+        <h2 id="drop-title">Drop files here</h2>
+        <p>or pick them from your computer</p>
+        <span class="btn btn-primary">Choose files</span>
+      </div>
+      <div class="marquee" aria-hidden="true"><div class="marquee-track" id="marquee"></div></div>
     </div>
-    <h1 id="drop-title">Drop any file to convert it</h1>
-    <p class="muted">MyFile shows what it can become. Your file stays in your browser and isn't uploaded.</p>
-    <button type="button" class="btn btn-primary" id="choose">Choose a file</button>
-    <input type="file" id="picker" hidden>
-    <p class="note">Images · PDFs · Markdown and text · Word (.docx) · CSV, JSON, YAML · Excel · subtitles · audio</p>
+
+    <div class="features">
+      <div class="feature"><div class="ic" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 15l5-5 4 4 3-3 6 6"/></svg></div><h3>Images and PDFs</h3><p>JPG, PNG, WebP and PDF both ways, with quality and size. PDF pages become images.</p></div>
+      <div class="feature"><div class="ic" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 6h16M4 12h16M4 18h10"/></svg></div><h3>Documents and data</h3><p>Markdown, Word, CSV, JSON, YAML and Excel, converted with their structure kept.</p></div>
+      <div class="feature"><div class="ic" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg></div><h3>Audio, even from video</h3><p>Turn recordings into MP3 or WAV, or pull the sound out of a video.</p></div>
+      <div class="feature"><div class="ic" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg></div><h3>Private by design</h3><p>Your files never leave your device. Originals are never changed.</p></div>
+    </div>
   </section>
 
-  <section id="file" class="panel file-card" hidden>
-    <div class="icon" aria-hidden="true">
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/></svg>
+  <!-- Workspace -->
+  <section id="workspace" class="workspace" hidden>
+    <div class="ws-head">
+      <h1 id="ws-title">Your files</h1>
+      <span class="spacer"></span>
+      <button type="button" class="btn btn-small" id="add">+ Add files</button>
+      <button type="button" class="btn btn-small" id="clear">Start over</button>
     </div>
-    <div>
-      <div class="name" id="file-name"></div>
-      <div class="muted small" id="file-meta"></div>
-    </div>
-    <div class="actions"><button type="button" class="btn" id="change">Change file</button></div>
-  </section>
 
-  <section id="convert" class="panel" hidden aria-label="Convert">
-    <h2 class="section-title" id="convert-title"></h2>
-    <div id="groups"></div>
-    <div class="settings" id="settings" hidden>
-      <label id="quality-row"><span>Quality</span><input type="range" id="quality" min="30" max="95" value="80"><span id="quality-value">80</span></label>
-      <label id="size-row"><span>Size</span>
-        <select id="size"><option value="">Original</option><option>3840</option><option>2560</option><option>1920</option><option>1280</option><option>800</option><option>480</option></select>
-      </label>
-      <label id="bitrate-row"><span>Bitrate</span>
-        <select id="bitrate"><option value="128">128 kbit/s</option><option value="192" selected>192 kbit/s</option><option value="256">256 kbit/s</option><option value="320">320 kbit/s</option><option value="96">96 kbit/s</option></select>
-      </label>
-      <button type="button" class="btn btn-primary" id="go"></button>
+    <div class="card" id="all-card" hidden>
+      <p class="label">Convert all to</p>
+      <div class="chips" id="all-chips" role="group" aria-label="Convert every file to"></div>
     </div>
-    <div class="status" id="status" hidden role="status"><span class="spinner" aria-hidden="true"></span><span id="status-text">Converting…</span><div class="bar" id="bar" hidden><span></span></div></div>
-    <div class="error" id="error" hidden role="alert"></div>
-    <div class="result" id="result" hidden>
-      <img id="preview" alt="Preview of the result" hidden>
-      <div>
-        <p class="ok" id="result-text" role="status"></p>
-        <a class="btn btn-primary" id="download" download>Download</a>
-        <p class="note">Your original file isn't changed.</p>
+
+    <ul class="queue" id="queue" aria-label="Files to convert"></ul>
+
+    <div class="card">
+      <div class="settings" id="settings">
+        <label id="quality-row"><span>Quality</span><input type="range" id="quality" min="30" max="95" value="80"><span id="quality-value">80</span></label>
+        <label id="size-row"><span>Size</span>
+          <select id="size"><option value="">Original size</option><option value="3840">Up to 3840px</option><option value="2560">Up to 2560px</option><option value="1920">Up to 1920px</option><option value="1280">Up to 1280px</option><option value="800">Up to 800px</option><option value="480">Up to 480px</option></select>
+        </label>
+        <label id="bitrate-row"><span>Bitrate</span>
+          <select id="bitrate"><option value="128">128 kbit/s</option><option value="192" selected>192 kbit/s</option><option value="256">256 kbit/s</option><option value="320">320 kbit/s</option><option value="96">96 kbit/s</option></select>
+        </label>
+      </div>
+      <div class="actions" style="margin-top:14px">
+        <span class="summary" id="summary" role="status"></span>
+        <span class="spacer"></span>
+        <button type="button" class="btn" id="zip" hidden>Download all (.zip)</button>
+        <button type="button" class="btn btn-primary" id="go">Convert</button>
+      </div>
+    </div>
+
+    <div class="card" id="compare-card" hidden>
+      <p class="label">Before and after</p>
+      <div class="compare" id="compare">
+        <img id="cmp-before" alt="Original image">
+        <img id="cmp-after" class="after" alt="Converted image">
+        <span class="handle" aria-hidden="true"></span>
+        <span class="tagl" id="cmp-l"></span><span class="tagr" id="cmp-r"></span>
+        <input type="range" id="cmp-range" min="0" max="100" value="50" aria-label="Drag to compare the original and converted image">
       </div>
     </div>
   </section>
 
-  <p class="note">This browser version covers the common conversions. The <a href="../">MyFile desktop app</a> adds an AI "describe it" box ("small enough to email"), video conversion, more image and audio formats, and Word/Excel/PowerPoint to PDF.</p>
+  <p class="footnote">This is the browser version. The <a href="../">MyFile desktop app</a> adds an AI "describe it" box ("make it small enough to email"), video conversion, more formats, and Word/Excel/PowerPoint to PDF.</p>
+  <input type="file" id="picker" multiple hidden>
 </main>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
@@ -143,592 +273,254 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/lamejs@1.2.1/lame.min.js"></script>
+<script src="engine.js"></script>
 <script>
 "use strict";
-pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+/* ---------- The interface: a queue of files, each with a target ---------- */
+const ABBR = { image: "IMG", pdf: "PDF", docx: "DOC", text: "TXT", table: "CSV", sheet: "XLS", data: "{ }", subs: "CC", audio: "♪", video: "▶" };
+const MARQUEE = ["JPG → PDF", "PDF → PNG", "PNG → WebP", "GIF → PNG", "Markdown → PDF", "Word → Markdown", "CSV → Excel", "Excel → JSON", "JSON → YAML", "SRT → VTT", "WAV → MP3", "Video → MP3", "SVG → PNG", "PDF → Text", "YAML → CSV", "AVIF → JPG"];
+const rows = [];
+let nextId = 1, busy = false, zipBlob = null;
 
-const MAX_BYTES = 300 * 1024 * 1024;
+const el = (tag, cls, txt) => { const e = document.createElement(tag); if (cls) e.className = cls; if (txt !== undefined) e.textContent = txt; return e; };
+function toast(msg) { const t = el("div", "toast", msg); t.setAttribute("role", "status"); document.body.append(t); setTimeout(() => t.remove(), 3200); }
 
-/* ---------- Formats ---------- */
-const FORMATS = {
-  png: ["image", "PNG image"], jpg: ["image", "JPEG image"], gif: ["image", "GIF image"], webp: ["image", "WebP image"],
-  bmp: ["image", "BMP image"], avif: ["image", "AVIF image"], ico: ["image", "Windows icon"], svg: ["image", "SVG image"],
-  pdf: ["pdf", "PDF document"], docx: ["docx", "Word document"],
-  md: ["text", "Markdown"], txt: ["text", "plain text"], html: ["text", "HTML page"],
-  csv: ["table", "CSV table"], tsv: ["table", "TSV table"], json: ["data", "JSON data"], yaml: ["data", "YAML data"],
-  xlsx: ["sheet", "Excel workbook"], xls: ["sheet", "Excel 97-2003 workbook"], ods: ["sheet", "OpenDocument spreadsheet"],
-  srt: ["subs", "SubRip subtitles"], vtt: ["subs", "WebVTT subtitles"],
-  mp3: ["audio", "MP3 audio"], wav: ["audio", "WAV audio"], m4a: ["audio", "M4A audio"], aac: ["audio", "AAC audio"],
-  ogg: ["audio", "Ogg audio"], flac: ["audio", "FLAC audio"], opus: ["audio", "Opus audio"],
-  mp4: ["video", "MP4 video"], mov: ["video", "QuickTime video"], webm: ["video", "WebM video"], m4v: ["video", "M4V video"],
-};
-const ALIASES = { jpeg: "jpg", jpe: "jpg", jfif: "jpg", markdown: "md", htm: "html", yml: "yaml", oga: "ogg", text: "txt", log: "txt" };
-const MIME = { "image/png": "png", "image/jpeg": "jpg", "image/gif": "gif", "image/webp": "webp", "image/bmp": "bmp", "image/avif": "avif",
-  "image/svg+xml": "svg", "application/pdf": "pdf", "audio/mpeg": "mp3", "audio/wav": "wav", "audio/x-wav": "wav", "video/mp4": "mp4", "video/webm": "webm" };
+// Marquee: the list twice so it scrolls seamlessly.
+for (const pass of [0, 1]) for (const m of MARQUEE) { const p = el("span", "pill"); const [a, b] = m.split(" → "); p.innerHTML = b ? `<b></b> → <b></b>` : `<b></b>`; const bs = p.querySelectorAll("b"); bs[0].textContent = a; if (b) bs[1].textContent = b; $("marquee").append(p); }
 
-function detect(file) {
-  let ext = (file.name.split(".").pop() || "").toLowerCase();
-  ext = ALIASES[ext] || ext;
-  if (FORMATS[ext]) return ext;
-  return MIME[file.type] || null;
+function addFiles(list) {
+  for (const file of list) {
+    if (file.size > MAX_BYTES) { toast(`${file.name} is over ${size(MAX_BYTES)}, so it was skipped.`); continue; }
+    const fmt = detect(file);
+    rows.push({ id: nextId++, file, fmt, targets: fmt ? routes(fmt) : [], target: fmt ? routes(fmt)[0]?.id ?? null : null, result: null, error: null, state: "ready", fraction: null });
+  }
+  render();
 }
 
-/* What each format can become: [id, label, hint, group, knobs]. */
-function routes(fmt) {
-  const fam = FORMATS[fmt][0];
-  const r = [];
-  const add = (id, label, hint, group, knobs = []) => { if (id !== fmt || group === "Image") r.push({ id, label, hint, group, knobs }); };
-  if (fam === "image") {
-    add("jpg", "JPG", null, "Image", ["quality", "size"]);
-    add("png", "PNG", null, "Image", ["size"]);
-    add("webp", "WebP", null, "Image", ["quality", "size"]);
-    add("pdf", "PDF", null, "Document", ["quality", "size"]);
-  } else if (fam === "pdf") {
-    add("png", "PNG", "one image per page", "Image", ["size"]);
-    add("jpg", "JPG", "one image per page", "Image", ["quality", "size"]);
-    add("txt", "Text", "the PDF's text", "Document");
-  } else if (fam === "docx") {
-    add("txt", "Text", null, "Document"); add("md", "Markdown", null, "Document"); add("html", "HTML", null, "Document"); add("pdf", "PDF", "text and headings", "Document");
-  } else if (fam === "text") {
-    for (const [id, l] of [["pdf", "PDF"], ["html", "HTML"], ["txt", "Text"], ["md", "Markdown"]]) {
-      if (fmt === "html" && id === "md") continue;
-      add(id, l, null, "Document");
+function render() {
+  $("landing").hidden = rows.length > 0;
+  $("workspace").hidden = rows.length === 0;
+  if (!rows.length) return;
+  $("ws-title").textContent = rows.length === 1 ? "Your file" : `${rows.length} files`;
+
+  // "Convert all to": targets every supported file can become.
+  const supported = rows.filter((r) => r.fmt);
+  const common = supported.length ? supported[0].targets.filter((t) => supported.every((r) => r.targets.some((x) => x.id === t.id))) : [];
+  $("all-card").hidden = supported.length < 1 || !common.length;
+  const chips = $("all-chips");
+  chips.replaceChildren();
+  for (const t of common) {
+    const b = el("button", "chip");
+    b.type = "button";
+    b.setAttribute("aria-pressed", String(supported.every((r) => r.target === t.id)));
+    b.append(el("b", "", t.label));
+    if (t.hint && supported.length === 1) b.append(el("span", "", t.hint));
+    b.disabled = busy;
+    b.addEventListener("click", () => { supported.forEach((r) => { r.target = t.id; r.result = null; r.state = "ready"; }); render(); });
+    chips.append(b);
+  }
+
+  const q = $("queue");
+  const existing = new Map([...q.children].map((li) => [Number(li.dataset.id), li]));
+  const keep = new Set();
+  for (const r of rows) {
+    keep.add(r.id);
+    let li = existing.get(r.id);
+    if (!li) { li = el("li", "row"); li.dataset.id = r.id; q.append(li); }
+    renderRow(li, r);
+  }
+  for (const [id, li] of existing) if (!keep.has(id)) li.remove();
+
+  // Settings that apply to at least one chosen target.
+  const knobs = new Set(rows.flatMap((r) => r.targets.find((t) => t.id === r.target)?.knobs ?? []));
+  $("quality-row").hidden = !knobs.has("quality");
+  $("size-row").hidden = !knobs.has("size");
+  $("bitrate-row").hidden = !knobs.has("bitrate");
+  $("settings").hidden = !knobs.size;
+
+  const ready = rows.filter((r) => r.fmt && r.target && r.state !== "done");
+  const done = rows.filter((r) => r.state === "done");
+  $("go").disabled = busy || !ready.length;
+  $("go").textContent = busy ? "Converting…" : ready.length > 1 ? `Convert ${ready.length} files` : "Convert";
+  $("zip").hidden = done.length < 2 || busy;
+  $("add").disabled = $("clear").disabled = busy;
+  const saved = done.reduce((s, r) => s + r.file.size, 0) - done.reduce((s, r) => s + r.result.size, 0);
+  $("summary").innerHTML = "";
+  if (done.length) {
+    $("summary").append(`${done.length} of ${rows.length} converted`);
+    if (saved > 0) { $("summary").append(" · "); const b = el("b", "", `${size(saved)} smaller`); $("summary").append(b); }
+  } else $("summary").textContent = supported.length < rows.length ? `${rows.length - supported.length} file(s) can't be converted in the browser.` : "";
+}
+
+function renderRow(li, r) {
+  li.replaceChildren();
+  const fam = r.fmt ? FORMATS[r.fmt][0] : "none";
+  const icon = el("div", `ficon fam-${fam}`, r.fmt ? (["data", "subs", "audio", "video"].includes(fam) ? ABBR[fam] : r.fmt.toUpperCase().slice(0, 4)) : "?");
+  icon.setAttribute("aria-hidden", "true");
+  const info = el("div");
+  info.append(el("div", "rname", r.file.name), el("div", "rmeta", `${r.fmt ? FORMATS[r.fmt][1] : "Not supported in the browser"} · ${size(r.file.size)}`));
+
+  const selWrap = el("div", "rsel");
+  if (r.targets.length) {
+    const sel = el("select");
+    sel.setAttribute("aria-label", `Convert ${r.file.name} to`);
+    for (const t of r.targets) {
+      const o = el("option", "", `→ ${t.label}${t.id === r.fmt ? " (smaller copy)" : ""}${t.hint ? ` · ${t.hint}` : ""}`);
+      o.value = t.id;
+      sel.append(o);
     }
-  } else if (fam === "table") {
-    for (const [id, l] of [["xlsx", "Excel"], ["json", "JSON"], ["csv", "CSV"], ["tsv", "TSV"], ["yaml", "YAML"], ["html", "HTML table"], ["md", "Markdown table"]]) add(id, l, null, "Data");
-  } else if (fam === "data") {
-    for (const [id, l] of [["json", "JSON"], ["yaml", "YAML"], ["csv", "CSV"], ["xlsx", "Excel"]]) add(id, l, id === "csv" || id === "xlsx" ? "for a list of records" : null, "Data");
-  } else if (fam === "sheet") {
-    for (const [id, l] of [["csv", "CSV"], ["json", "JSON"], ["html", "HTML table"], ["md", "Markdown table"]]) add(id, l, "one file per sheet", "Data");
-    if (fmt !== "xlsx") add("xlsx", "Excel", null, "Spreadsheet");
-  } else if (fam === "subs") {
-    add("srt", "SRT", null, "Subtitles"); add("vtt", "VTT", null, "Subtitles"); add("txt", "Text", "just the lines", "Document");
-  } else if (fam === "audio" || fam === "video") {
-    const hint = fam === "video" ? "just the audio" : null;
-    add("mp3", "MP3", hint, "Audio", ["bitrate"]); add("wav", "WAV", hint, "Audio");
+    sel.value = r.target;
+    sel.disabled = busy;
+    sel.addEventListener("change", () => { r.target = sel.value; r.result = null; r.state = "ready"; render(); });
+    selWrap.append(sel);
   }
-  return r;
+
+  const state = el("div", "rstate");
+  if (r.state === "working") {
+    const bar = el("div", "bar" + (r.fraction === null ? " indeterminate" : ""));
+    const fill = el("span");
+    if (r.fraction !== null) fill.style.width = `${Math.round(r.fraction * 100)}%`;
+    bar.append(fill);
+    state.append(bar);
+  } else if (r.state === "done") {
+    const ok = el("span", "ok pop", `✓ ${size(r.result.size)}`);
+    state.append(ok);
+    if (r.result.size < r.file.size) state.append(el("div", "rmeta", `${Math.round((1 - r.result.size / r.file.size) * 100)}% smaller`));
+  } else if (r.state === "error") {
+    state.append(el("span", "err", r.error));
+  } else if (r.state === "queued") {
+    state.append(el("span", "rmeta", "Waiting…"));
+  } else if (!r.fmt) {
+    state.append(el("span", "rmeta", "Try the desktop app"));
+  }
+
+  const act = el("div");
+  if (r.state === "done") {
+    const a = el("a", "btn btn-small btn-primary", "Download");
+    a.href = r.result.url;
+    a.download = r.result.name;
+    a.title = r.result.name;
+    act.append(a);
+  }
+  const rm = el("button", "btn btn-icon", "✕");
+  rm.type = "button";
+  rm.disabled = busy;
+  rm.setAttribute("aria-label", `Remove ${r.file.name}`);
+  rm.addEventListener("click", () => { const i = rows.indexOf(r); if (r.result) URL.revokeObjectURL(r.result.url); rows.splice(i, 1); updateCompare(); render(); });
+  act.append(rm);
+  act.style.display = "flex";
+  act.style.gap = "6px";
+  li.append(icon, info, selWrap, state, act);
 }
 
-/* ---------- Helpers ---------- */
-const $ = (id) => document.getElementById(id);
-const stemOf = (name) => name.replace(/\.[^.]+$/, "") || "file";
-const esc = (s) => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
-function size(n) {
-  if (n < 1024) return n + " bytes";
-  if (n < 1024 * 1024) return (n / 1024).toFixed(1) + " KB";
-  return (n / 1024 / 1024).toFixed(1) + " MB";
-}
-const tick = () => new Promise((r) => setTimeout(r, 0));
-const text = (file) => file.text().then((t) => t.replace(/^﻿/, ""));
-function htmlPage(title, body) {
-  return `<!doctype html>\n<html>\n<head>\n<meta charset="utf-8">\n<meta name="viewport" content="width=device-width, initial-scale=1">\n<title>${esc(title)}</title>\n<style>body{font-family:system-ui,sans-serif;max-width:46rem;margin:2rem auto;padding:0 1rem;line-height:1.6}pre,code{background:#f4f4f5;border-radius:4px}pre{padding:.8rem;overflow:auto}table{border-collapse:collapse}td,th{border:1px solid #d0d7de;padding:.3rem .6rem;text-align:left}</style>\n</head>\n<body>\n${body}\n</body>\n</html>\n`;
-}
-const blobOf = (s, type) => new Blob([s], { type });
-let progress = () => {};
-
-/* ---------- Images ---------- */
-function loadImage(file) {
-  return new Promise((resolve, reject) => {
-    const url = URL.createObjectURL(file);
-    const img = new Image();
-    img.onload = () => { URL.revokeObjectURL(url); resolve(img); };
-    img.onerror = () => { URL.revokeObjectURL(url); reject(new Error("Your browser can't open this image.")); };
-    img.src = url;
-  });
-}
-function toCanvas(source, w, h, max, opaque) {
-  let scale = 1;
-  if (max && Math.max(w, h) > max) scale = max / Math.max(w, h);
-  const c = document.createElement("canvas");
-  c.width = Math.max(1, Math.round(w * scale));
-  c.height = Math.max(1, Math.round(h * scale));
-  const ctx = c.getContext("2d");
-  if (opaque) { ctx.fillStyle = "#fff"; ctx.fillRect(0, 0, c.width, c.height); }
-  ctx.imageSmoothingQuality = "high";
-  ctx.drawImage(source, 0, 0, c.width, c.height);
-  return c;
-}
-const canvasBlob = (c, type, q) => new Promise((res, rej) => c.toBlob((b) => (b ? res(b) : rej(new Error("Your browser couldn't encode this format."))), type, q));
-async function imagesToPdf(canvases, q) {
-  const { jsPDF } = window.jspdf;
-  let doc = null;
-  for (const c of canvases) {
-    const w = c.width * 0.75, h = c.height * 0.75;
-    const orient = w > h ? "landscape" : "portrait";
-    if (!doc) doc = new jsPDF({ orientation: orient, unit: "pt", format: [w, h] });
-    else doc.addPage([w, h], orient);
-    doc.addImage(c.toDataURL("image/jpeg", q), "JPEG", 0, 0, w, h);
-  }
-  return doc.output("blob");
-}
-async function convertImage(file, target, s) {
-  const img = await loadImage(file);
-  const w = img.naturalWidth || 1024, h = img.naturalHeight || 1024;
-  const opaque = target === "jpg" || target === "pdf";
-  const c = toCanvas(img, w, h, s.size, opaque);
-  if (target === "pdf") return [await imagesToPdf([c], s.quality), "pdf"];
-  const type = { jpg: "image/jpeg", png: "image/png", webp: "image/webp" }[target];
-  const blob = await canvasBlob(c, type, s.quality);
-  if (blob.type !== type) throw new Error("Your browser can't save " + target.toUpperCase() + " images.");
-  return [blob, target];
+function settingsNow() {
+  return { quality: Number($("quality").value) / 100, size: Number($("size").value) || null, bitrate: Number($("bitrate").value) };
 }
 
-/* ---------- PDF ---------- */
-async function openPdf(file) {
-  return pdfjsLib.getDocument({ data: new Uint8Array(await file.arrayBuffer()) }).promise;
-}
-async function pdfToImages(file, target, s, stem) {
-  const pdf = await openPdf(file);
-  if (pdf.numPages > 300) throw new Error(`This PDF has ${pdf.numPages} pages; the browser version converts up to 300.`);
-  const files = [];
-  const digits = String(pdf.numPages).length;
-  for (let i = 1; i <= pdf.numPages; i++) {
-    const page = await pdf.getPage(i);
-    const base = page.getViewport({ scale: 1 });
-    const scale = s.size ? (s.size + 0.5) / Math.max(base.width, base.height) : 150 / 72;
-    const vp = page.getViewport({ scale });
-    const c = document.createElement("canvas");
-    c.width = Math.floor(vp.width); c.height = Math.floor(vp.height);
-    const ctx = c.getContext("2d");
-    ctx.fillStyle = "#fff"; ctx.fillRect(0, 0, c.width, c.height);
-    await page.render({ canvasContext: ctx, viewport: vp }).promise;
-    const blob = await canvasBlob(c, target === "jpg" ? "image/jpeg" : "image/png", s.quality);
-    const name = pdf.numPages === 1 ? `${stem}.${target}` : `${stem}-page-${String(i).padStart(Math.max(2, digits), "0")}.${target}`;
-    files.push([name, blob]);
-    progress(i / pdf.numPages);
-  }
-  return files;
-}
-async function pdfText(file) {
-  const pdf = await openPdf(file);
-  let out = "";
-  for (let i = 1; i <= pdf.numPages; i++) {
-    const content = await (await pdf.getPage(i)).getTextContent();
-    let line = "";
-    for (const it of content.items) { line += it.str + (it.hasEOL ? "\n" : " "); }
-    if (pdf.numPages > 1) out += `--- Page ${i} ---\n\n`;
-    out += line.replace(/[ \t]+\n/g, "\n").trim() + "\n\n";
-    progress(i / pdf.numPages);
-  }
-  return out;
-}
-
-/* ---------- Documents: blocks -> PDF / HTML / Markdown / text ---------- */
-function markdownBlocks(md) {
-  const blocks = [];
-  const plain = (tokens) => (tokens || []).map((t) => (t.tokens ? plain(t.tokens) : t.text || t.raw || "")).join("");
-  for (const t of marked.lexer(md)) {
-    if (t.type === "heading") blocks.push({ kind: "h", level: t.depth, text: plain(t.tokens) });
-    else if (t.type === "paragraph") blocks.push({ kind: "p", text: plain(t.tokens) });
-    else if (t.type === "list") for (const it of t.items) blocks.push({ kind: "li", text: plain(it.tokens).replace(/\s+/g, " ").trim() });
-    else if (t.type === "code") blocks.push({ kind: "code", text: t.text });
-    else if (t.type === "hr") blocks.push({ kind: "hr" });
-    else if (t.type === "blockquote") blocks.push({ kind: "p", text: plain(t.tokens) });
-    else if (t.type === "table") {
-      const row = (cells) => cells.map((c) => plain(c.tokens)).join("  |  ");
-      blocks.push({ kind: "code", text: [row(t.header), ...t.rows.map(row)].join("\n") });
+async function convertAll() {
+  const todo = rows.filter((r) => r.fmt && r.target && r.state !== "done");
+  if (!todo.length) return;
+  busy = true;
+  zipBlob = null;
+  const s = settingsNow();
+  for (const r of todo) { r.state = "queued"; }
+  render();
+  for (const r of todo) {
+    if (!rows.includes(r)) continue;
+    r.state = "working"; r.fraction = null; r.error = null;
+    render();
+    const li = $("queue").querySelector(`[data-id="${r.id}"]`);
+    progress = (f) => { r.fraction = f; const fill = li?.querySelector(".bar > span"); if (fill) { li.querySelector(".bar").classList.remove("indeterminate"); fill.style.width = Math.round(f * 100) + "%"; } };
+    try {
+      await tick();
+      const files = await convert(r.file, r.fmt, r.target, s);
+      let blob, name;
+      if (files.length === 1) [name, blob] = files[0];
+      else {
+        const z = new JSZip();
+        files.forEach(([n, b]) => z.file(n, b));
+        blob = await z.generateAsync({ type: "blob" });
+        name = `${stemOf(r.file.name)}-${r.target}.zip`;
+      }
+      r.result = { name, blob, size: blob.size, url: URL.createObjectURL(blob), files, preview: files[0][1].type.startsWith("image/") ? files[0][1] : null };
+      r.state = "done";
+      window.__lastResult = { name, blob, count: files.length };
+    } catch (e) {
+      r.state = "error";
+      r.error = e && e.message ? e.message : String(e);
     }
+    render();
   }
-  return blocks;
+  busy = false;
+  progress = () => {};
+  render();
+  updateCompare();
+  const ok = todo.filter((r) => r.state === "done").length;
+  toast(ok === todo.length ? `Done: ${ok} file${ok === 1 ? "" : "s"} converted` : `${ok} of ${todo.length} converted; see the errors in the list`);
 }
-function textBlocks(t) {
-  return t.replace(/\r\n/g, "\n").split("\n").map((l) => l.trimEnd()).map((l) => (l ? { kind: "p", text: l.trim() } : null)).filter(Boolean);
+
+/* Before/after for the first converted image (original must be an image too). */
+let cmpUrls = [];
+function updateCompare() {
+  cmpUrls.forEach((u) => URL.revokeObjectURL(u));
+  cmpUrls = [];
+  const r = rows.find((x) => x.state === "done" && x.result.preview && FORMATS[x.fmt][0] === "image" && x.file.type !== "image/svg+xml");
+  $("compare-card").hidden = !r;
+  if (!r) return;
+  const before = URL.createObjectURL(r.file), after = URL.createObjectURL(r.result.preview);
+  cmpUrls = [before, after];
+  $("cmp-before").src = before;
+  $("cmp-after").src = after;
+  $("cmp-l").textContent = `Original · ${size(r.file.size)}`;
+  $("cmp-r").textContent = `${r.target.toUpperCase()} · ${size(r.result.preview.size)}`;
 }
-function htmlBlocks(html) {
-  const doc = new DOMParser().parseFromString(html, "text/html");
-  doc.querySelectorAll("script,style,noscript,template").forEach((n) => n.remove());
-  const blocks = [];
-  const walk = (el) => {
-    for (const n of el.children) {
-      const tag = n.tagName.toLowerCase();
-      const t = n.textContent.replace(/\s+/g, " ").trim();
-      if (/^h[1-6]$/.test(tag)) { if (t) blocks.push({ kind: "h", level: +tag[1], text: t }); }
-      else if (tag === "li") { if (t) blocks.push({ kind: "li", text: t }); }
-      else if (tag === "pre") blocks.push({ kind: "code", text: n.textContent.replace(/^\n|\n$/g, "") });
-      else if (tag === "hr") blocks.push({ kind: "hr" });
-      else if (tag === "p" || tag === "tr" || tag === "dt" || tag === "dd" || tag === "figcaption") { if (t) blocks.push({ kind: "p", text: t }); }
-      else if (n.children.length) walk(n);
-      else if (t) blocks.push({ kind: "p", text: t });
+$("cmp-range").addEventListener("input", (e) => $("compare").style.setProperty("--split", e.target.value + "%"));
+
+async function downloadAll() {
+  if (!zipBlob) {
+    const z = new JSZip();
+    const used = new Set();
+    for (const r of rows.filter((x) => x.state === "done")) {
+      for (const [n, b] of r.result.files) {
+        let name = n, k = 2;
+        while (used.has(name)) name = n.replace(/(\.[^.]+)?$/, ` (${k++})$1`);
+        used.add(name);
+        z.file(name, b);
+      }
     }
-  };
-  walk(doc.body);
-  return blocks;
-}
-function blocksToText(b) {
-  return b.map((x) => (x.kind === "li" ? `- ${x.text}` : x.kind === "hr" ? "----" : x.text)).join("\n\n").trim() + "\n";
-}
-function blocksToMarkdown(b) {
-  return b.map((x) => x.kind === "h" ? `${"#".repeat(Math.min(6, x.level))} ${x.text}` : x.kind === "li" ? `- ${x.text}` : x.kind === "code" ? "```\n" + x.text + "\n```" : x.kind === "hr" ? "---" : x.text)
-    .join("\n\n").replace(/(^- .*)\n\n(?=- )/gm, "$1\n").trim() + "\n";
-}
-function blocksToHtml(b) {
-  let out = "", inList = false;
-  for (const x of b) {
-    if (inList && x.kind !== "li") { out += "</ul>\n"; inList = false; }
-    if (x.kind === "h") out += `<h${Math.min(6, x.level)}>${esc(x.text)}</h${Math.min(6, x.level)}>\n`;
-    else if (x.kind === "li") { if (!inList) { out += "<ul>\n"; inList = true; } out += `<li>${esc(x.text)}</li>\n`; }
-    else if (x.kind === "code") out += `<pre>${esc(x.text)}</pre>\n`;
-    else if (x.kind === "hr") out += "<hr>\n";
-    else out += `<p>${esc(x.text)}</p>\n`;
+    zipBlob = await z.generateAsync({ type: "blob" });
   }
-  return out + (inList ? "</ul>\n" : "");
-}
-function blocksToPdf(blocks) {
-  const { jsPDF } = window.jspdf;
-  const doc = new jsPDF({ unit: "pt", format: "letter" });
-  const M = 64, W = doc.internal.pageSize.getWidth() - 2 * M, H = doc.internal.pageSize.getHeight();
-  let y = M;
-  const line = (txt, font, style, sz, indent = 0) => {
-    doc.setFont(font, style); doc.setFontSize(sz);
-    for (const l of doc.splitTextToSize(txt, W - indent)) {
-      if (y + sz * 1.35 > H - M) { doc.addPage(); y = M; }
-      y += sz * 1.35;
-      doc.text(l, M + indent, y - sz * 0.3);
-    }
-  };
-  for (const b of blocks) {
-    if (b.kind === "h") { const sz = [20, 16, 13.5, 12][Math.min(4, b.level) - 1]; if (y > M) y += sz * 0.8; line(b.text, "helvetica", "bold", sz); y += 4; }
-    else if (b.kind === "li") { line("•  " + b.text, "helvetica", "normal", 11, 6); y += 3; }
-    else if (b.kind === "code") { b.text.split("\n").forEach((l) => line(l || " ", "courier", "normal", 9)); y += 8; }
-    else if (b.kind === "hr") { y += 7; doc.setDrawColor(190); doc.line(M, y, M + W, y); y += 7; }
-    else { line(b.text, "helvetica", "normal", 11); y += 7; }
-  }
-  return doc.output("blob");
-}
-async function docxBlocks(file) {
-  const zip = await JSZip.loadAsync(await file.arrayBuffer());
-  const part = zip.file("word/document.xml");
-  if (!part) throw new Error("This Word file has no document part.");
-  const xml = new DOMParser().parseFromString(await part.async("string"), "application/xml");
-  const W = "http://schemas.openxmlformats.org/wordprocessingml/2006/main";
-  const blocks = [];
-  for (const p of xml.getElementsByTagNameNS(W, "p")) {
-    let t = "";
-    for (const n of p.getElementsByTagNameNS(W, "*")) {
-      if (n.localName === "t") t += n.textContent;
-      else if (n.localName === "tab") t += "\t";
-      else if (n.localName === "br") t += " ";
-    }
-    t = t.trim();
-    if (!t) continue;
-    const style = (p.getElementsByTagNameNS(W, "pStyle")[0]?.getAttributeNS(W, "val") || "").toLowerCase();
-    const level = style.startsWith("heading") ? parseInt(style.slice(7), 10) : style === "title" ? 1 : 0;
-    if (level) blocks.push({ kind: "h", level, text: t });
-    else if (p.getElementsByTagNameNS(W, "numPr").length || style.includes("list")) blocks.push({ kind: "li", text: t });
-    else blocks.push({ kind: "p", text: t });
-  }
-  return blocks;
+  const a = el("a");
+  a.href = URL.createObjectURL(zipBlob);
+  a.download = "myfile-converted.zip";
+  a.click();
+  setTimeout(() => URL.revokeObjectURL(a.href), 4000);
 }
 
-/* ---------- Data ---------- */
-function cellValue(s) {
-  const t = String(s).trim();
-  if (t === "true" || t === "false") return t === "true";
-  const leadingZero = t.length > 1 && t.startsWith("0") && !t.startsWith("0.");
-  if (!leadingZero && t !== "" && /^-?\d+(\.\d+)?$/.test(t)) return Number(t);
-  return s;
-}
-function parseDelimited(t, fs) {
-  const wb = XLSX.read(t, { type: "string", raw: true, FS: fs });
-  const rows = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], { header: 1, raw: false, defval: "" });
-  return { headers: (rows[0] || []).map(String), rows: rows.slice(1).map((r) => r.map(String)) };
-}
-const tableToRecords = (t) => t.rows.map((r) => Object.fromEntries(t.headers.map((h, i) => [h || `column${i + 1}`, cellValue(r[i] ?? "")])));
-function recordsToTable(v) {
-  let items = v;
-  if (v && !Array.isArray(v) && typeof v === "object") {
-    const lists = Object.values(v).filter(Array.isArray);
-    items = Object.keys(v).length === 1 && lists.length === 1 ? lists[0] : [v];
-  }
-  if (!Array.isArray(items) || !items.length) throw new Error("This data isn't a list of records, so it can't become a table.");
-  const cell = (x) => (x === null || x === undefined ? "" : typeof x === "object" ? JSON.stringify(x) : String(x));
-  if (items.every(Array.isArray)) return { headers: items[0].map(cell), rows: items.slice(1).map((r) => r.map(cell)) };
-  if (!items.every((i) => i && typeof i === "object")) throw new Error("This data isn't a list of records, so it can't become a table.");
-  const headers = [];
-  items.forEach((i) => Object.keys(i).forEach((k) => headers.includes(k) || headers.push(k)));
-  return { headers, rows: items.map((i) => headers.map((h) => cell(i[h]))) };
-}
-function writeDelimited(t, fs) {
-  const q = (s) => (/["\n\r]/.test(s) || s.includes(fs) ? `"${s.replace(/"/g, '""')}"` : s);
-  return [t.headers, ...t.rows].map((r) => r.map((c) => q(String(c))).join(fs)).join("\n") + "\n";
-}
-const tableHtml = (t, title) => htmlPage(title, "<table>\n<thead><tr>" + t.headers.map((h) => `<th>${esc(h)}</th>`).join("") + "</tr></thead>\n<tbody>\n" + t.rows.map((r) => "<tr>" + r.map((c) => `<td>${esc(c)}</td>`).join("") + "</tr>").join("\n") + "\n</tbody>\n</table>");
-function tableMd(t) {
-  const c = (s) => String(s).replace(/\|/g, "\\|").replace(/\n/g, " ");
-  return `| ${t.headers.map(c).join(" | ")} |\n|${" --- |".repeat(Math.max(1, t.headers.length))}\n` + t.rows.map((r) => `| ${r.map(c).join(" | ")} |`).join("\n") + "\n";
-}
-function xlsxBlob(sheets) {
-  const wb = XLSX.utils.book_new();
-  for (const [name, t] of sheets) {
-    const ws = XLSX.utils.aoa_to_sheet([t.headers, ...t.rows.map((r) => r.map(cellValue))]);
-    XLSX.utils.book_append_sheet(wb, ws, name.replace(/[\[\]:*?\/\\]/g, "").slice(0, 31) || "Sheet1");
-  }
-  return new Blob([XLSX.write(wb, { bookType: "xlsx", type: "array" })], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
-}
-function writeTable(t, target, title) {
-  switch (target) {
-    case "csv": return blobOf(writeDelimited(t, ","), "text/csv");
-    case "tsv": return blobOf(writeDelimited(t, "\t"), "text/tab-separated-values");
-    case "html": return blobOf(tableHtml(t, title), "text/html");
-    case "md": return blobOf(tableMd(t), "text/markdown");
-    case "json": return blobOf(JSON.stringify(tableToRecords(t), null, 2) + "\n", "application/json");
-    case "yaml": return blobOf(jsyaml.dump(tableToRecords(t)), "text/yaml");
-    case "xlsx": return xlsxBlob([[title, t]]);
-  }
-}
-
-/* ---------- Subtitles ---------- */
-function parseCues(t) {
-  const cues = [];
-  for (const block of t.replace(/\r\n/g, "\n").split(/\n\s*\n/)) {
-    const lines = block.split("\n").filter((l) => l.trim());
-    const at = lines.findIndex((l) => l.includes("-->"));
-    if (at < 0) continue;
-    const [a, b] = lines[at].split("-->");
-    cues.push({ start: a.trim(), end: (b || "").trim().split(/\s+/)[0], text: lines.slice(at + 1) });
-  }
-  return cues;
-}
-function normTime(t, sep) {
-  const [hms, ms = "0"] = t.replace(",", ".").split(".");
-  const p = hms.split(":").map(Number);
-  while (p.length < 3) p.unshift(0);
-  const pad = (n, w = 2) => String(n || 0).padStart(w, "0");
-  return `${pad(p[0])}:${pad(p[1])}:${pad(p[2])}${sep}${pad(Number(ms.slice(0, 3).padEnd(3, "0")), 3)}`;
-}
-function writeCues(cues, target) {
-  if (target === "vtt") return "WEBVTT\n\n" + cues.map((c) => `${normTime(c.start, ".")} --> ${normTime(c.end, ".")}\n${c.text.join("\n")}\n`).join("\n");
-  if (target === "srt") return cues.map((c, i) => `${i + 1}\n${normTime(c.start, ",")} --> ${normTime(c.end, ",")}\n${c.text.join("\n")}\n`).join("\n");
-  return cues.flatMap((c) => c.text.map((l) => l.replace(/<[^>]*>|\{[^}]*\}/g, ""))).filter((l) => l.trim()).join("\n") + "\n";
-}
-
-/* ---------- Audio ---------- */
-async function decodeAudio(file) {
-  const Ctx = window.AudioContext || window.webkitAudioContext;
-  const ctx = new Ctx();
-  try {
-    return await ctx.decodeAudioData(await file.arrayBuffer());
-  } catch {
-    throw new Error("Your browser can't decode the sound in this file. (The desktop app converts many more formats.)");
-  } finally {
-    ctx.close();
-  }
-}
-function toInt16(f32) {
-  const out = new Int16Array(f32.length);
-  for (let i = 0; i < f32.length; i++) { const s = Math.max(-1, Math.min(1, f32[i])); out[i] = s < 0 ? s * 0x8000 : s * 0x7fff; }
-  return out;
-}
-function wavBlob(buf) {
-  const ch = Math.min(2, buf.numberOfChannels), rate = buf.sampleRate, n = buf.length;
-  const data = new DataView(new ArrayBuffer(44 + n * ch * 2));
-  const str = (o, s) => [...s].forEach((c, i) => data.setUint8(o + i, c.charCodeAt(0)));
-  str(0, "RIFF"); data.setUint32(4, 36 + n * ch * 2, true); str(8, "WAVE"); str(12, "fmt ");
-  data.setUint32(16, 16, true); data.setUint16(20, 1, true); data.setUint16(22, ch, true); data.setUint32(24, rate, true);
-  data.setUint32(28, rate * ch * 2, true); data.setUint16(32, ch * 2, true); data.setUint16(34, 16, true); str(36, "data"); data.setUint32(40, n * ch * 2, true);
-  const chans = [...Array(ch)].map((_, i) => buf.getChannelData(i));
-  let o = 44;
-  for (let i = 0; i < n; i++) for (let c = 0; c < ch; c++) { const s = Math.max(-1, Math.min(1, chans[c][i])); data.setInt16(o, s < 0 ? s * 0x8000 : s * 0x7fff, true); o += 2; }
-  return new Blob([data], { type: "audio/wav" });
-}
-async function mp3Blob(buf, kbps) {
-  const ch = Math.min(2, buf.numberOfChannels);
-  const enc = new lamejs.Mp3Encoder(ch, buf.sampleRate, kbps);
-  const left = toInt16(buf.getChannelData(0));
-  const right = ch > 1 ? toInt16(buf.getChannelData(1)) : null;
-  const parts = [];
-  const step = 1152 * 64;
-  for (let i = 0; i < left.length; i += 1152) {
-    const l = left.subarray(i, i + 1152);
-    const out = right ? enc.encodeBuffer(l, right.subarray(i, i + 1152)) : enc.encodeBuffer(l);
-    if (out.length) parts.push(new Uint8Array(out));
-    if (i % step === 0) { progress(i / left.length); await tick(); }
-  }
-  const end = enc.flush();
-  if (end.length) parts.push(new Uint8Array(end));
-  return new Blob(parts, { type: "audio/mpeg" });
-}
-
-/* ---------- Run a conversion ---------- */
-async function convert(file, fmt, target, s) {
-  const stem = stemOf(file.name);
-  const name = (ext) => `${target === fmt ? stem + "-converted" : stem}.${ext}`;
-  const fam = FORMATS[fmt][0];
-  const one = (blob, ext) => [[name(ext), blob]];
-  if (fam === "image") { const [b, ext] = await convertImage(file, target, s); return one(b, ext); }
-  if (fam === "pdf") {
-    if (target === "txt") return one(blobOf(await pdfText(file), "text/plain"), "txt");
-    return pdfToImages(file, target, s, stem);
-  }
-  if (fam === "docx" || fam === "text") {
-    let blocks;
-    if (fam === "docx") blocks = await docxBlocks(file);
-    else if (fmt === "md") {
-      if (target === "html") return one(blobOf(htmlPage(stem, marked.parse(await text(file))), "text/html"), "html");
-      blocks = markdownBlocks(await text(file));
-    } else if (fmt === "html") blocks = htmlBlocks(await text(file));
-    else blocks = textBlocks(await text(file));
-    if (!blocks.length) throw new Error("No text was found in this file.");
-    if (target === "pdf") return one(blocksToPdf(blocks), "pdf");
-    if (target === "html") return one(blobOf(htmlPage(stem, blocksToHtml(blocks)), "text/html"), "html");
-    if (target === "md") return one(blobOf(blocksToMarkdown(blocks), "text/markdown"), "md");
-    return one(blobOf(blocksToText(blocks), "text/plain"), "txt");
-  }
-  if (fam === "table") {
-    const t = parseDelimited(await text(file), fmt === "tsv" ? "\t" : ",");
-    return one(writeTable(t, target, stem), target);
-  }
-  if (fam === "data") {
-    const raw = await text(file);
-    let v;
-    try { v = fmt === "json" ? JSON.parse(raw) : jsyaml.load(raw); }
-    catch (e) { throw new Error(`This ${fmt.toUpperCase()} file couldn't be read: ${e.message}`); }
-    if (target === "json") return one(blobOf(JSON.stringify(v, null, 2) + "\n", "application/json"), "json");
-    if (target === "yaml") return one(blobOf(jsyaml.dump(v), "text/yaml"), "yaml");
-    return one(writeTable(recordsToTable(v), target, stem), target);
-  }
-  if (fam === "sheet") {
-    const wb = XLSX.read(new Uint8Array(await file.arrayBuffer()), { type: "array" });
-    const sheets = wb.SheetNames.map((n) => {
-      const rows = XLSX.utils.sheet_to_json(wb.Sheets[n], { header: 1, raw: false, defval: "" });
-      return [n, { headers: (rows[0] || []).map(String), rows: rows.slice(1).filter((r) => r.some((c) => c !== "")).map((r) => r.map(String)) }];
-    }).filter(([, t]) => t.headers.length || t.rows.length);
-    if (!sheets.length) throw new Error("This workbook has no data.");
-    if (target === "xlsx") return one(xlsxBlob(sheets), "xlsx");
-    return sheets.map(([n, t]) => [sheets.length === 1 ? `${stem}.${target}` : `${stem}-${n.replace(/[^\w\- ]/g, "_")}.${target}`, writeTable(t, target, n)]);
-  }
-  if (fam === "subs") {
-    const cues = parseCues(await text(file));
-    if (!cues.length) throw new Error("No subtitle cues were found in this file.");
-    return one(blobOf(writeCues(cues, target), "text/plain"), target);
-  }
-  if (fam === "audio" || fam === "video") {
-    const buf = await decodeAudio(file);
-    return one(target === "wav" ? wavBlob(buf) : await mp3Blob(buf, s.bitrate), target);
-  }
-  throw new Error("MyFile can't convert this file in the browser.");
-}
-
-/* ---------- Interface ---------- */
-let current = null, chosen = null, resultUrl = null;
-
-function show(id, on) { $(id).hidden = !on; }
-function reset() {
-  current = null; chosen = null;
-  show("drop", true); show("file", false); show("convert", false);
-  $("picker").value = "";
-}
-function pick(t) {
-  chosen = t;
-  document.querySelectorAll(".chip").forEach((c) => c.setAttribute("aria-checked", String(c.dataset.id === t.id)));
-  show("settings", true);
-  show("quality-row", t.knobs.includes("quality"));
-  show("size-row", t.knobs.includes("size"));
-  show("bitrate-row", t.knobs.includes("bitrate"));
-  $("go").textContent = `Convert to ${t.label}`;
-  show("result", false); show("error", false);
-}
-function openFile(file) {
-  if (file.size > MAX_BYTES) { alert(`That file is ${size(file.size)}. The browser version handles files up to ${size(MAX_BYTES)}.`); return; }
-  const fmt = detect(file);
-  current = { file, fmt };
-  show("drop", false); show("file", true); show("convert", true);
-  $("file-name").textContent = file.name;
-  $("file-meta").textContent = `${fmt ? FORMATS[fmt][1] : "Unknown type"} · ${size(file.size)}`;
-  show("settings", false); show("status", false); show("result", false); show("error", false);
-  const groups = $("groups");
-  groups.replaceChildren();
-  if (!fmt) {
-    $("convert-title").textContent = "No conversions yet";
-    const p = document.createElement("p");
-    p.className = "muted";
-    p.textContent = "The browser version doesn't convert this kind of file. The MyFile desktop app handles many more formats.";
-    groups.append(p);
-    return;
-  }
-  $("convert-title").textContent = `Convert this ${FORMATS[fmt][1]} to`;
-  const byGroup = new Map();
-  for (const t of routes(fmt)) byGroup.set(t.group, [...(byGroup.get(t.group) || []), t]);
-  for (const [g, list] of byGroup) {
-    const wrap = document.createElement("div");
-    wrap.className = "group";
-    const label = document.createElement("span");
-    label.className = "group-label";
-    label.textContent = g;
-    const grid = document.createElement("div");
-    grid.className = "grid";
-    grid.setAttribute("role", "radiogroup");
-    grid.setAttribute("aria-label", `${g} formats`);
-    for (const t of list) {
-      const b = document.createElement("button");
-      b.type = "button"; b.className = "chip"; b.dataset.id = t.id;
-      b.setAttribute("role", "radio"); b.setAttribute("aria-checked", "false");
-      const bl = document.createElement("b"); bl.textContent = t.label + (t.id === fmt ? " (smaller copy)" : "");
-      b.append(bl);
-      if (t.hint) { const h = document.createElement("span"); h.textContent = t.hint; b.append(h); }
-      b.addEventListener("click", () => pick(t));
-      grid.append(b);
-    }
-    wrap.append(label, grid);
-    groups.append(wrap);
-  }
-}
-
-async function run() {
-  if (!current || !chosen) return;
-  const s = { quality: Number($("quality").value) / 100, size: Number($("size").value) || null, bitrate: Number($("bitrate").value) };
-  show("result", false); show("error", false); show("status", true); show("bar", false);
-  $("go").disabled = true;
-  document.querySelectorAll(".chip").forEach((c) => (c.disabled = true));
-  progress = (f) => { show("bar", true); $("bar").firstElementChild.style.width = Math.round(f * 100) + "%"; };
-  const started = performance.now();
-  try {
-    await tick();
-    let files = await convert(current.file, current.fmt, chosen.id, s);
-    let out, outName;
-    if (files.length === 1) [outName, out] = files[0];
-    else {
-      const zip = new JSZip();
-      files.forEach(([n, b]) => zip.file(n, b));
-      out = await zip.generateAsync({ type: "blob" });
-      outName = `${stemOf(current.file.name)}-${chosen.id}.zip`;
-    }
-    if (resultUrl) URL.revokeObjectURL(resultUrl);
-    resultUrl = URL.createObjectURL(out);
-    window.__lastResult = { name: outName, blob: out, count: files.length };
-    const a = $("download");
-    a.href = resultUrl; a.download = outName;
-    a.textContent = files.length === 1 ? `Download ${outName}` : `Download ${files.length} files (.zip)`;
-    const smaller = files.length === 1 && out.size < current.file.size ? ` (${Math.round((1 - out.size / current.file.size) * 100)}% smaller)` : "";
-    $("result-text").textContent = `✓ ${files.length === 1 ? outName : files.length + " files"} · ${size(out.size)}${smaller} · ${((performance.now() - started) / 1000).toFixed(1)} s`;
-    const first = files[0][1];
-    const prev = $("preview");
-    if (first.type.startsWith("image/")) { prev.src = URL.createObjectURL(first); prev.hidden = false; } else prev.hidden = true;
-    show("result", true);
-  } catch (e) {
-    $("error").textContent = "That conversion didn't work: " + (e && e.message ? e.message : e);
-    show("error", true);
-  } finally {
-    show("status", false);
-    $("go").disabled = false;
-    document.querySelectorAll(".chip").forEach((c) => (c.disabled = false));
-  }
-}
-
-$("choose").addEventListener("click", () => $("picker").click());
-$("change").addEventListener("click", () => $("picker").click());
-$("picker").addEventListener("change", () => { const f = $("picker").files[0]; if (f) openFile(f); });
-$("go").addEventListener("click", run);
-$("quality").addEventListener("input", () => ($("quality-value").textContent = $("quality").value));
+/* Wiring */
+const pickFiles = () => $("picker").click();
+$("drop").addEventListener("click", pickFiles);
+$("drop").addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); pickFiles(); } });
+$("add").addEventListener("click", pickFiles);
+$("clear").addEventListener("click", () => { rows.forEach((r) => r.result && URL.revokeObjectURL(r.result.url)); rows.length = 0; updateCompare(); render(); });
+$("picker").addEventListener("change", () => { addFiles([...$("picker").files]); $("picker").value = ""; });
+$("go").addEventListener("click", convertAll);
+$("zip").addEventListener("click", downloadAll);
+$("quality").addEventListener("input", () => {
+  $("quality-value").textContent = $("quality").value;
+  rows.forEach((r) => { if (r.state === "done" && r.targets.find((t) => t.id === r.target)?.knobs.includes("quality")) r.state = "ready"; });
+  render();
+});
+for (const id of ["size", "bitrate"]) $(id).addEventListener("change", () => { rows.forEach((r) => { if (r.state === "done") r.state = "ready"; }); render(); });
 let depth = 0;
-addEventListener("dragenter", (e) => { e.preventDefault(); depth++; $("drop").classList.add("is-dragging"); });
-addEventListener("dragleave", () => { if (--depth <= 0) { depth = 0; $("drop").classList.remove("is-dragging"); } });
+addEventListener("dragenter", (e) => { e.preventDefault(); depth++; $("drop").classList.add("is-dragging"); $("drop-title").textContent = "Release to add"; });
+addEventListener("dragleave", () => { if (--depth <= 0) { depth = 0; $("drop").classList.remove("is-dragging"); $("drop-title").textContent = "Drop files here"; } });
 addEventListener("dragover", (e) => e.preventDefault());
 addEventListener("drop", (e) => {
-  e.preventDefault(); depth = 0; $("drop").classList.remove("is-dragging");
-  const f = e.dataTransfer.files[0];
-  if (f) openFile(f);
+  e.preventDefault(); depth = 0;
+  $("drop").classList.remove("is-dragging"); $("drop-title").textContent = "Drop files here";
+  if (busy) return;
+  addFiles([...e.dataTransfer.files]);
 });
 </script>
 </body>

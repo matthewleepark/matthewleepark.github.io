@@ -5,55 +5,246 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="color-scheme" content="dark">
 <title>MyFile · File converter</title>
+<meta name="description" content="MyFile is a desktop file converter for Windows and macOS with an AI step that turns a request like 'small enough to email' into the right conversion. TCSS 490, Artifact 3.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg: #0f1320;
-    --surface: #171c2b;
-    --text: #eceef1;
-    --muted: #a5adb8;
+    --bg: #0b0d14;
+    --bg-2: #10131d;
+    --surface: #151926;
+    --surface-2: #1c2132;
+    --border: #262c40;
+    --border-strong: #353d57;
+    --text: #eef0f6;
+    --text-2: #a3abc2;
+    --text-3: #727b96;
     --accent: #7b9cff;
+    --accent-2: #b48cff;
+    --accent-ink: #0b1030;
+    --success: #4fd18b;
+    --radius: 18px;
+    --shadow: 0 30px 80px -30px rgba(0, 0, 0, .7);
   }
-  * { box-sizing: border-box; margin: 0; }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
   body {
-    min-height: 100vh;
-    padding: clamp(20px, 5vw, 56px) 16px;
-    background: var(--bg);
-    color: var(--text);
-    font: 16px/1.6 "Segoe UI", -apple-system, system-ui, sans-serif;
+    margin: 0; color: var(--text); background: var(--bg); overflow-x: hidden;
+    font: 16px/1.6 Inter, "Segoe UI", -apple-system, system-ui, sans-serif;
+    background-image:
+      radial-gradient(1000px 600px at 10% -10%, rgba(123, 156, 255, .18), transparent 60%),
+      radial-gradient(800px 600px at 100% 0%, rgba(180, 140, 255, .14), transparent 60%);
+    background-repeat: no-repeat;
   }
-  main { max-width: 960px; margin: 0 auto; display: flex; flex-direction: column; gap: 18px; }
-  .kicker { color: var(--accent); font-size: 13px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; }
-  h1 { font-size: clamp(28px, 5vw, 40px); line-height: 1.15; }
-  p { color: var(--muted); max-width: 70ch; }
-  video { width: 100%; border-radius: 12px; border: 1px solid #2a3044; background: #000; }
-  ul { color: var(--muted); padding-left: 20px; }
-  li + li { margin-top: 4px; }
-  strong { color: var(--text); }
   a { color: var(--accent); }
-  .open-app { display: inline-block; padding: 10px 18px; border-radius: 999px; background: var(--accent); color: #0d1430; font-weight: 700; text-decoration: none; }
-  .note-inline { font-size: 14px; margin-left: 8px; }
-  .log { display: flex; flex-direction: column; gap: 12px; margin-top: 12px; padding-top: 20px; border-top: 1px solid #2a3044; }
-  .log h2 { font-size: 24px; }
-  .log h3 { font-size: 17px; margin-top: 6px; }
-  .log-meta { font-size: 14px; }
+  img, video { max-width: 100%; height: auto; display: block; }
+
+  .topbar { position: sticky; top: 0; z-index: 10; display: flex; align-items: center; gap: 10px; padding: 12px clamp(16px, 4vw, 32px); background: rgba(11, 13, 20, .72); backdrop-filter: blur(14px); border-bottom: 1px solid var(--border); }
+  .brand-mark { display: grid; place-items: center; width: 30px; height: 30px; border-radius: 9px; background: linear-gradient(135deg, var(--accent), var(--accent-2)); color: var(--accent-ink); font-weight: 800; }
+  .brand-name { font-weight: 700; font-size: 17px; }
+  .nav { margin-left: auto; display: flex; gap: 20px; font-size: 14px; }
+  .nav a { color: var(--text-2); text-decoration: none; }
+  .nav a:hover { color: var(--text); }
+
+  .wrap { max-width: 1100px; margin: 0 auto; padding: 0 clamp(16px, 4vw, 32px); }
+  .block { padding: clamp(48px, 8vw, 88px) 0 0; scroll-margin-top: 60px; }
+  .eyebrow { font-size: 12px; font-weight: 700; letter-spacing: .16em; text-transform: uppercase; color: var(--accent); }
+  h1, h2, h3 { letter-spacing: -.025em; }
+  h2 { margin: 8px 0 12px; font-size: clamp(26px, 4vw, 38px); line-height: 1.12; }
+  .lead { color: var(--text-2); font-size: clamp(16px, 2vw, 19px); max-width: 640px; margin: 0; }
+  .grad { background: linear-gradient(90deg, var(--accent), var(--accent-2) 60%, #ff9ad5); -webkit-background-clip: text; background-clip: text; color: transparent; }
+
+  /* Hero */
+  .hero { display: grid; grid-template-columns: 1fr 1.15fr; gap: clamp(28px, 4vw, 56px); align-items: center; padding-top: clamp(40px, 7vw, 80px); }
+  .hero h1 { margin: 10px 0 14px; font-size: clamp(38px, 5.2vw, 60px); line-height: 1.02; font-weight: 800; letter-spacing: -.04em; }
+  .buttons { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 24px; }
+  .btn { display: inline-flex; align-items: center; gap: 8px; text-decoration: none; font-weight: 600; font-size: 15px; border-radius: 999px; padding: 11px 20px; border: 1px solid var(--border-strong); background: var(--surface-2); color: var(--text); transition: transform .15s, border-color .15s; }
+  .btn:hover { transform: translateY(-1px); border-color: var(--accent); }
+  .btn-primary { background: linear-gradient(135deg, var(--accent), var(--accent-2)); border-color: transparent; color: var(--accent-ink); }
+  .meta { margin-top: 14px; font-size: 13px; color: var(--text-3); }
+  .window { border-radius: 14px; overflow: hidden; border: 1px solid var(--border-strong); background: #1b1d23; box-shadow: var(--shadow); transform: perspective(1400px) rotateY(-6deg) rotateX(2deg); transition: transform .4s; }
+  .window:hover { transform: none; }
+  .window .bar { display: flex; gap: 6px; padding: 10px 12px; background: #23262e; border-bottom: 1px solid #2c303a; }
+  .window .bar i { width: 11px; height: 11px; border-radius: 50%; }
+  .window .bar i:nth-child(1) { background: #ff5f57; } .window .bar i:nth-child(2) { background: #febc2e; } .window .bar i:nth-child(3) { background: #28c840; }
+
+  /* Stats */
+  .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; margin-top: clamp(40px, 6vw, 64px); }
+  .stat { padding: 18px; border: 1px solid var(--border); border-radius: 16px; background: rgba(21, 25, 38, .6); }
+  .stat b { display: block; font-size: 30px; font-weight: 800; letter-spacing: -.03em; }
+  .stat span { color: var(--text-2); font-size: 14px; }
+
+  /* Steps */
+  .steps { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 14px; margin-top: 24px; counter-reset: step; }
+  .step { padding: 22px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); }
+  .step::before { counter-increment: step; content: counter(step); display: grid; place-items: center; width: 34px; height: 34px; border-radius: 10px; background: linear-gradient(135deg, var(--accent), var(--accent-2)); color: var(--accent-ink); font-weight: 800; }
+  .step h3 { margin: 14px 0 6px; font-size: 18px; }
+  .step p { margin: 0; color: var(--text-2); font-size: 15px; }
+
+  /* Gallery */
+  .gallery { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-top: 24px; }
+  figure { margin: 0; }
+  figure img { border-radius: 14px; border: 1px solid var(--border-strong); box-shadow: var(--shadow); }
+  figcaption { margin-top: 10px; color: var(--text-2); font-size: 14px; }
+
+  /* AI vs code */
+  .split { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 24px; }
+  .col { padding: 24px; border-radius: var(--radius); border: 1px solid var(--border); background: var(--surface); }
+  .col h3 { margin: 0 0 12px; font-size: 18px; display: flex; align-items: center; gap: 10px; }
+  .col ul { margin: 0; padding-left: 20px; color: var(--text-2); }
+  .col li + li { margin-top: 8px; }
+  .col li b { color: var(--text); }
+  .badge { font-size: 12px; font-weight: 700; padding: 3px 10px; border-radius: 999px; }
+  .badge-ai { background: rgba(180, 140, 255, .18); color: var(--accent-2); }
+  .badge-code { background: rgba(79, 209, 139, .16); color: var(--success); }
+  .callout { margin: 16px 0 0; padding: 16px 20px; border-left: 3px solid var(--accent); border-radius: 0 12px 12px 0; background: rgba(123, 156, 255, .08); color: var(--text-2); }
+  .callout b { color: var(--text); }
+
+  /* Formats */
+  .formats { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; margin-top: 24px; }
+  .fmt { padding: 18px; border: 1px solid var(--border); border-radius: 16px; background: rgba(21, 25, 38, .6); }
+  .fmt h3 { margin: 0 0 6px; font-size: 16px; }
+  .fmt p { margin: 0; color: var(--text-2); font-size: 14px; }
+  .tags { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 18px; }
+  .tags span { padding: 6px 12px; border-radius: 999px; border: 1px solid var(--border); background: var(--bg-2); font-size: 13px; color: var(--text-2); }
+
+  .video { margin-top: 24px; border-radius: var(--radius); overflow: hidden; border: 1px solid var(--border-strong); box-shadow: var(--shadow); background: #000; }
+  .video video { width: 100%; }
+
+  /* Build log (generated from the repo's LOG.md) */
+  .log { display: flex; flex-direction: column; gap: 10px; max-width: 820px; padding: 28px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); }
+  .log h2 { margin: 0; font-size: 26px; }
+  .log h3 { margin: 12px 0 0; font-size: 17px; color: var(--text); }
+  .log ul { margin: 0; padding-left: 20px; color: var(--text-2); }
+  .log li + li { margin-top: 4px; }
+  .log-meta { margin: 0; font-size: 14px; color: var(--text-3); }
+
+  footer { margin: clamp(56px, 8vw, 96px) 0 40px; padding-top: 24px; border-top: 1px solid var(--border); display: flex; flex-wrap: wrap; gap: 16px; justify-content: space-between; color: var(--text-3); font-size: 14px; }
+
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; } .window { transform: none; } html { scroll-behavior: auto; } }
+  @media (max-width: 860px) {
+    .hero, .gallery, .split { grid-template-columns: 1fr; }
+    .window { transform: none; }
+    .nav { display: none; }
+  }
 </style>
 </head>
 <body>
-<main>
-  <span class="kicker">TCSS 490 · Artifact 3 · AI inside it</span>
-  <h1>MyFile: convert any file</h1>
-  <p>A Windows/macOS desktop app (Tauri 2, Rust, React). Drop a file in and it shows what it can become. Pick a format, or just describe what you need, and save the new copy. Your original file is never changed.</p>
-  <p><a class="open-app" href="app/">Try it in your browser ↗</a> <span class="note-inline">A browser version of the converter. Your file isn't uploaded.</span></p>
-  <ul>
-    <li><strong>What it converts:</strong> images (JPG, PNG, WebP, HEIC and more, or to PDF), PDF pages to images, Word/Excel/PowerPoint text, CSV/JSON/YAML/Excel, audio (MP3, WAV, M4A...), video (MP4, WebM, GIF, or just the audio), subtitles, and ZIP files.</li>
-    <li><strong>The AI's job:</strong> turn a request like "small enough to email" into one of the conversions for that file, plus settings like quality and size. It runs on a free local model or Claude, and it only sees my words and the file type.</li>
-    <li><strong>The code's job:</strong> only accept a conversion that's actually on the list for that file, keep settings in range, do the conversion itself, and never overwrite the original.</li>
-    <li><strong>More tools:</strong> the earlier features (AI document assistant, fact-checking, templates, comparing versions, speech to text, and search) are still there under "More tools for this file."</li>
-  </ul>
-  <p>Demo of an earlier version, before MyFile became a converter:</p>
-  <video controls preload="metadata" poster="poster.jpg" src="myfile-demo.mp4">
-    Your browser can't play this video. <a href="myfile-demo.mp4">Download it</a> instead.
-  </video>
+<header class="topbar">
+  <span class="brand-mark" aria-hidden="true">M</span>
+  <span class="brand-name">MyFile</span>
+  <nav class="nav" aria-label="Sections">
+    <a href="#how">How it works</a>
+    <a href="#ai">The AI part</a>
+    <a href="#formats">Formats</a>
+    <a href="#demo">Demo</a>
+    <a href="#log">Build log</a>
+    <a href="../">Portfolio</a>
+  </nav>
+</header>
+
+<main class="wrap">
+  <div class="hero">
+    <div>
+      <span class="eyebrow">TCSS 490 · Artifact 3 · AI inside it</span>
+      <h1>MyFile<br><span class="grad">converts any file.</span></h1>
+      <p class="lead">A desktop file converter for Windows and macOS. Drop in a file and it shows what it can become. Pick a format, or just describe what you need, like <i>"small enough to email"</i>, and AI picks the conversion for you.</p>
+      <div class="buttons">
+        <a class="btn btn-primary" href="app/">Try it in your browser ↗</a>
+        <a class="btn" href="https://github.com/matthewleepark/myfile/releases">Download the app</a>
+        <a class="btn" href="https://github.com/matthewleepark/myfile" target="_blank" rel="noopener">View on GitHub</a>
+      </div>
+      <p class="meta">Free · no account · the browser version never uploads your files</p>
+    </div>
+    <div class="window" aria-hidden="true">
+      <div class="bar"><i></i><i></i><i></i></div>
+      <img src="shots/03-describe-it.jpg" alt="" width="1280" height="940">
+    </div>
+  </div>
+
+  <div class="stats">
+    <div class="stat"><b>74</b><span>formats it reads (110 file extensions)</span></div>
+    <div class="stat"><b>137</b><span>automated tests, run on Windows and macOS</span></div>
+    <div class="stat"><b>22k+</b><span>lines of Rust and TypeScript</span></div>
+    <div class="stat"><b>$0</b><span>no paid API key: a local model or Claude Code</span></div>
+  </div>
+
+  <section class="block" id="how" aria-labelledby="how-title">
+    <span class="eyebrow">How it works</span>
+    <h2 id="how-title">Three steps, and your original is never touched</h2>
+    <div class="steps">
+      <div class="step"><h3>Drop a file</h3><p>MyFile reads what the file really is from its contents, not just its name, and lists every format it can become, grouped by kind.</p></div>
+      <div class="step"><h3>Pick a format, or describe it</h3><p>Click a format, or type what you need. The AI chooses one conversion from that file's list and suggests quality, size or bitrate.</p></div>
+      <div class="step"><h3>Convert and save</h3><p>Conversion runs on your computer with live progress. Save the copy wherever you want; several files (like PDF pages) go into a folder.</p></div>
+    </div>
+  </section>
+
+  <section class="block" aria-labelledby="shots-title">
+    <span class="eyebrow">Screenshots</span>
+    <h2 id="shots-title">The real app, converting real files</h2>
+    <div class="gallery">
+      <figure><img src="shots/02-image-formats.jpg" alt="MyFile showing every format a PNG image can become: JPG, PNG, WebP, GIF, BMP, TIFF, ICO, TGA, QOI, AVIF and PDF" width="1280" height="940" loading="lazy"><figcaption>A PNG and everything it can become, grouped by kind.</figcaption></figure>
+      <figure><img src="shots/03-describe-it.jpg" alt="Typing 'make it small enough to email'; the AI picks JPG at quality 75 up to 800 pixels, and the result is 36% smaller" width="1280" height="940" loading="lazy"><figcaption>"Make it small enough to email": the AI picked JPG, quality 75, 800 px. The result is 36% smaller.</figcaption></figure>
+      <figure><img src="shots/04-video.jpg" alt="An MP4 video with options for other video formats, an animated GIF, a still frame, or just the audio" width="1280" height="940" loading="lazy"><figcaption>A lecture video: other video formats, an animated GIF, a still frame, or just the audio.</figcaption></figure>
+      <figure><img src="shots/05-pdf-pages.jpg" alt="A PDF converted to one PNG image per page" width="1280" height="940" loading="lazy"><figcaption>A PDF turned into one image per page, rendered on the computer.</figcaption></figure>
+    </div>
+  </section>
+
+  <section class="block" id="ai" aria-labelledby="ai-title">
+    <span class="eyebrow">The AI part</span>
+    <h2 id="ai-title">The AI makes one decision. My code checks it.</h2>
+    <p class="lead">The model never touches your files or runs anything. It answers one bounded question, and ordinary code decides whether to accept the answer.</p>
+    <div class="split">
+      <div class="col">
+        <h3><span class="badge badge-ai">AI</span> What the model does</h3>
+        <ul>
+          <li><b>Reads your request</b> ("a PDF to print", "small enough to email") and picks one conversion from this file's list.</li>
+          <li><b>Suggests settings</b>: quality, size, or audio bitrate.</li>
+          <li>Under <b>More tools</b>: summarizes documents, finds deadlines, fact-checks claims, and fills templates, always citing quotes.</li>
+          <li>Runs on a <b>free local model</b> (Qwen through Ollama) by default, or Claude through Claude Code.</li>
+        </ul>
+      </div>
+      <div class="col">
+        <h3><span class="badge badge-code">Code</span> What my code does</h3>
+        <ul>
+          <li><b>Rejects any pick</b> that isn't really on the list for that file, and snaps settings to allowed values.</li>
+          <li><b>Does every conversion itself</b> (Rust, ffmpeg, a PDF renderer). The AI never sees a file's contents to convert it.</li>
+          <li><b>Checks every quote</b> the AI gives against the real document, and keeps wrong or invented dates off calendars.</li>
+          <li><b>Asks permission</b> before any text goes to Claude, and never overwrites your original.</li>
+        </ul>
+      </div>
+    </div>
+    <p class="callout"><b>Testing caught real AI mistakes.</b> The local model once put a 2026 date in 2022, and once gave "every Friday" an exact date. Now my code fills in a missing year itself and flags dates that aren't in the quoted text.</p>
+  </section>
+
+  <section class="block" id="formats" aria-labelledby="formats-title">
+    <span class="eyebrow">Formats</span>
+    <h2 id="formats-title">What it converts</h2>
+    <div class="formats">
+      <div class="fmt"><h3>Images</h3><p>JPG, PNG, WebP, GIF, BMP, TIFF, ICO, TGA, QOI, AVIF, and PDF. Also reads HEIC, PSD and more. Quality and size settings.</p></div>
+      <div class="fmt"><h3>PDF</h3><p>One PNG or JPG per page, or the text as plain text or Markdown.</p></div>
+      <div class="fmt"><h3>Documents and ebooks</h3><p>Markdown, text and HTML to PDF or HTML. Text from Word, PowerPoint, OpenDocument and EPUB.</p></div>
+      <div class="fmt"><h3>Data and spreadsheets</h3><p>CSV, TSV, JSON, YAML, TOML, XML and Excel to each other, keeping key order and leading zeros.</p></div>
+      <div class="fmt"><h3>Audio and video</h3><p>MP3, M4A, WAV, FLAC, OGG, Opus; MP4, WebM, MOV, MKV, AVI; animated GIF; or just the audio.</p></div>
+      <div class="fmt"><h3>Subtitles and archives</h3><p>SRT, VTT and ASS to each other or plain text. Extract ZIP and TAR, or repack between them.</p></div>
+    </div>
+    <div class="tags" aria-label="Built with">
+      <span>Tauri 2</span><span>Rust</span><span>React + TypeScript</span><span>ffmpeg</span><span>hayro (PDF rendering)</span><span>whisper.cpp (speech to text)</span><span>Ollama · Qwen 2.5</span><span>Claude Code</span><span>SQLite search</span>
+    </div>
+  </section>
+
+  <section class="block" id="demo" aria-labelledby="demo-title">
+    <span class="eyebrow">Demo</span>
+    <h2 id="demo-title">Watch it convert</h2>
+    <div class="video">
+      <video controls preload="metadata" poster="poster.jpg" src="myfile-demo.mp4">
+        Your browser can't play this video. <a href="myfile-demo.mp4">Download it</a> instead.
+      </video>
+    </div>
+  </section>
+
+  <div class="block" id="log">
   <section class="log" aria-labelledby="log-title">
     <h2 id="log-title">Build log</h2>
     <p class="log-meta">Tool: Claude Code in VS Code (mostly Opus 5.5, sometimes Haiku)</p>
@@ -88,16 +279,26 @@
     <ul>
       <li>Claude built the Windows installers and checked the project against the assignment requirements.</li>
       <li>I had it shorten this log so it matches my other logs.</li>
+      <li>I pushed everything to GitHub. The Mac build failed at first because the speech-to-text part needs a newer macOS, so Claude set the minimum to macOS 10.15. Then it failed again while packaging, so it split the Mac build into separate Apple Silicon and Intel apps. Now Windows and both Mac builds pass.</li>
+      <li>I felt like the project looked like no effort went into it, even though a lot was built. So I had Claude make it look better: a browser version of the converter on my portfolio (it converts many files at once and has a before/after slider), a new project page with real screenshots, and a new demo video of the converter.</li>
+      <li>Testing the browser version caught that PDF and MP3 conversions stalled when the tab wasn't visible, so Claude fixed that.</li>
+      <li>I published a release on GitHub so people can download the app for Windows or Mac.</li>
     </ul>
     <h3>Issues</h3>
     <ul>
       <li>Asking for "everything" made the app way too big and messy, so I had to step back and focus on converting files. Next time I'd decide the main purpose first.</li>
       <li>Testing caught some real bugs that Claude fixed: the AI put a date in the wrong year (2022 instead of 2026), the installed app ran 7x slower because of a build setting, and JSON to YAML mixed up the order of things.</li>
       <li>Some tools aren't installed on my computer, so those parts aren't tested yet. OCR needs Tesseract (the install got cancelled), and Word/Excel/PowerPoint to PDF needs LibreOffice.</li>
-      <li>The Mac version only builds after I push the code to GitHub, so I haven't seen it work yet.</li>
+      <li>I don't have a Mac, so the Mac version builds and passes its tests on GitHub, but I haven't run it on a real Mac.</li>
+      <li>The browser version can't do everything the desktop app can. The AI "describe it" box and video conversion need the desktop app.</li>
     </ul>
   </section>
-  <p><a href="../">← Back to the portfolio</a></p>
+  </div>
+
+  <footer>
+    <span>MyFile · Matthew Lee Park · TCSS 490</span>
+    <span><a href="../">← Back to the portfolio</a> · <a href="https://github.com/matthewleepark/myfile/blob/main/LOG.md" target="_blank" rel="noopener">Log on GitHub</a></span>
+  </footer>
 </main>
 </body>
 </html>
