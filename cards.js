@@ -20,9 +20,10 @@ const CARDS = [
     number: 3,
     title: "MyFile",
     status: "done",
-    link: "https://matthewleepark.github.io/myfile/",
-    description: "A desktop file utility where Claude reads your documents and plain code checks everything it says.",
-    reflection: "For this artifact I built MyFile, a desktop app where you drop in a file and get the actions that make sense for it, with Claude reading documents through Claude Code in headless mode. The biggest thing I learned was deciding what the model should do and what plain code should check: Claude reads and summarizes, but my own code checks every quote it gives against the real document, asks permission before anything is sent, and only lets it pick from a fixed list of actions. I also built an evaluation with trap documents and a prompt injection, and it showed that Haiku matched Sonnet on my test set at about a tenth of the cost, which changed how I think about picking models. Having several AI reviewers try to break my code found real bugs I would have missed, like a request for one file running on a different file after a quick switch."
+    link: "https://github.com/matthewleepark/myfile",
+    app: "https://matthewleepark.github.io/myfile/",
+    description: "A desktop file converter: drop in a file and turn it into a PDF, JPG, MP3, and more, with AI that can pick the conversion for you.",
+    reflection: "For this one I used Claude Code to build a real desktop app, which was a big step up from my last artifact. At first I kept asking for more and more features, and the app ended up being mostly about summarizing documents instead of what I actually wanted, which was a file converter. I had to step back, tell Claude what the app is really for, and have it clean everything up. I learned that the AI can build a lot really fast, but it's on me to keep the project focused. I also learned to have my code double-check what the AI says instead of just trusting it, and testing caught real bugs I wouldn't have noticed, like a date put in the wrong year. Overall, it taught me that planning what I want first saves a lot of time and back-and-forth."
   },
   {
     number: 4,

@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="color-scheme" content="dark">
-<title>MyFile · Demo</title>
+<title>MyFile · File converter</title>
 <style>
   :root {
     --bg: #0f1320;
@@ -39,17 +39,18 @@
 <body>
 <main>
   <span class="kicker">TCSS 490 · Artifact 3 · AI inside it</span>
-  <h1>MyFile: one shortcut for every file</h1>
-  <p>A Windows/macOS desktop app (Tauri 2, Rust, React). Drop a file in and get the actions that make sense for it. Claude reads documents through Claude Code in headless mode, and plain code checks everything it says.</p>
+  <h1>MyFile: convert any file</h1>
+  <p>A Windows/macOS desktop app (Tauri 2, Rust, React). Drop a file in and it shows what it can become. Pick a format, or just describe what you need, and save the new copy. Your original file is never changed.</p>
+  <ul>
+    <li><strong>What it converts:</strong> images (JPG, PNG, WebP, HEIC and more, or to PDF), PDF pages to images, Word/Excel/PowerPoint text, CSV/JSON/YAML/Excel, audio (MP3, WAV, M4A...), video (MP4, WebM, GIF, or just the audio), subtitles, and ZIP files.</li>
+    <li><strong>The AI's job:</strong> turn a request like "small enough to email" into one of the conversions for that file, plus settings like quality and size. It runs on a free local model or Claude, and it only sees my words and the file type.</li>
+    <li><strong>The code's job:</strong> only accept a conversion that's actually on the list for that file, keep settings in range, do the conversion itself, and never overwrite the original.</li>
+    <li><strong>More tools:</strong> the earlier features (AI document assistant, fact-checking, templates, comparing versions, speech to text, and search) are still there under "More tools for this file."</li>
+  </ul>
+  <p>Demo of an earlier version, before MyFile became a converter:</p>
   <video controls preload="metadata" poster="poster.jpg" src="myfile-demo.mp4">
     Your browser can't play this video. <a href="myfile-demo.mp4">Download it</a> instead.
   </video>
-  <ul>
-    <li><strong>The model's job:</strong> read extracted text and return structured answers (summaries, deadlines, requirements), or pick one action from a fixed list for a typed request.</li>
-    <li><strong>The code's job:</strong> ask consent before any text leaves the computer, check every quote against the real document, fix page numbers, cross-check calendar dates, and refuse anything outside the allowlist.</li>
-    <li><strong>Bigger features:</strong> a semester brain that turns a folder of syllabi into one timeline with conflicts and crunch weeks; an agent mode (plan → approve → run); a private local model you can run side by side with Claude; a folder watch for new downloads; and an MCP server so Claude Code can use MyFile as a tool.</li>
-    <li><strong>Evaluation:</strong> 13 test documents, including traps and a prompt injection. Haiku and Sonnet passed 13/13, while a small local model passed 8/13 and fell for the injection. That exposed a gap in MyFile's own checks, now fixed: the model was fooled, but the fake date never reached the calendar.</li>
-  </ul>
   <section class="log" aria-labelledby="log-title">
     <h2 id="log-title">Build log</h2>
     <p class="log-meta">Tool: Claude Code in VS Code (mostly Opus 5.5, sometimes Haiku)</p>
