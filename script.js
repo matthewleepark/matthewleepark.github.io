@@ -40,6 +40,61 @@ CARDS.forEach((card, i) => {
   container.append(el);
 });
 
+/* ---------- 1b. Card slider: arrows, mouse drag, and edge fades ---------- */
+const slideNav = document.querySelector(".slide-nav");
+const [prevBtn, nextBtn] = slideNav.querySelectorAll(".slide-btn");
+
+function updateSlider() {
+  const max = container.scrollWidth - container.clientWidth;
+  const atStart = container.scrollLeft <= 2, atEnd = container.scrollLeft >= max - 2;
+  slideNav.hidden = max <= 2;
+  prevBtn.disabled = atStart;
+  nextBtn.disabled = atEnd;
+  container.classList.toggle("more-left", !atStart);
+  container.classList.toggle("more-right", !atEnd);
+}
+
+function slideBy(dir) {
+  const card = container.querySelector(".dish");
+  const step = card ? card.offsetWidth + parseFloat(getComputedStyle(container).columnGap) : container.clientWidth;
+  container.scrollBy({ left: dir * step });
+}
+slideNav.querySelectorAll(".slide-btn").forEach(b => b.addEventListener("click", () => slideBy(+b.dataset.dir)));
+
+// Drag with the mouse to slide (touch and trackpads already swipe natively).
+let drag = null;
+container.addEventListener("pointerdown", e => {
+  if (e.pointerType !== "mouse" || e.button !== 0) return;
+  drag = { x: e.clientX, left: container.scrollLeft, moved: false };
+});
+addEventListener("pointermove", e => {
+  if (!drag) return;
+  const dx = e.clientX - drag.x;
+  if (!drag.moved && Math.abs(dx) < 6) return;
+  drag.moved = true;
+  container.classList.add("dragging");
+  container.scrollLeft = drag.left - dx;
+});
+addEventListener("pointerup", () => {
+  if (!drag) return;
+  const moved = drag.moved;
+  drag = null;
+  if (!moved) return;
+  // Let the row snap to the nearest card from where the drag let go.
+  const left = container.scrollLeft;
+  container.classList.remove("dragging");
+  container.scrollLeft = left;
+  // A drag shouldn't also open the card it started on.
+  const swallow = e => { e.stopPropagation(); e.preventDefault(); };
+  container.addEventListener("click", swallow, { capture: true, once: true });
+  setTimeout(() => { container.removeEventListener("click", swallow, true); updateSlider(); }, 0);
+});
+container.addEventListener("dragstart", e => e.preventDefault());
+
+container.addEventListener("scroll", updateSlider, { passive: true });
+addEventListener("resize", updateSlider);
+updateSlider();
+
 /* ---------- 2. Details modal ---------- */
 const modal = document.getElementById("modal");
 const modalLink = document.getElementById("modal-link");
