@@ -43,10 +43,11 @@ const CARDS = [
   },
   {
     number: 6,
-    title: "Extra Artifact",
-    status: "idea",
-    link: "",
-    description: "An extra artifact beyond the five required ones, for extra labor credit.",
+    title: "Earthbreaker",
+    status: "wip",
+    link: "https://github.com/matthewleepark/earthbreaker",
+    app: "https://matthewleepark.github.io/earthbreaker/",
+    description: "A 3D globe of the real Earth: search any place and fly there over real terrain. Disaster simulations, starting with volcanic eruptions, come next.",
     reflection: ""
   }
 ];

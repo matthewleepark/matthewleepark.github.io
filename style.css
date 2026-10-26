@@ -275,6 +275,7 @@ nav a:hover { border-color: var(--red); background: var(--red); color: #fff; tra
   background: #8a7f7a;
 }
 .dish.done .thumb::after { background: #3ddc84; }
+.dish.wip .thumb::after { background: #ffb340; }
 .dish-text { min-width: 0; }
 .dish h3 { margin: 0; font: 500 .86rem var(--sans); line-height: 1.35; }
 .dish-open { all: unset; cursor: pointer; }

@@ -6,6 +6,7 @@ const reduceMotion = false;   // effects always play, even with the system "Redu
 const finePointer = matchMedia("(hover: hover) and (pointer: fine)").matches;
 const isLight = () => root.dataset.theme === "light";
 const pad = n => String(n).padStart(2, "0");
+const STATUS_LABEL = { done: "Done", wip: "WIP", idea: "Idea" };
 
 function make(tag, className, text) {
   const node = document.createElement(tag);
@@ -33,7 +34,7 @@ CARDS.forEach((card, i) => {
   title.append(open);
 
   const meta = make("p", "dish-meta", "— Artifact " + card.number + " ");
-  meta.append(make("span", null, card.status === "done" ? "Done" : "Idea"));
+  meta.append(make("span", null, STATUS_LABEL[card.status]));
 
   text.append(title, meta);
   el.append(thumb, text);
@@ -105,7 +106,7 @@ const modalReflection = document.getElementById("modal-reflection");
 
 function openModal(card) {
   document.getElementById("modal-badge").textContent =
-    "Artifact " + card.number + (card.status === "idea" ? " · idea" : " · done");
+    "Artifact " + card.number + " · " + STATUS_LABEL[card.status];
   document.getElementById("modal-title").textContent = card.title;
   document.getElementById("modal-desc").textContent = card.description;
 
