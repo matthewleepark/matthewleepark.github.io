@@ -4,7 +4,7 @@ const CARDS = [
     title: "This Portfolio",
     status: "done",
     link: "https://matthewleepark.github.io",
-    description: "A static site that holds all five TCSS 490 artifacts.",
+    description: "A static site that holds all my TCSS 490 artifacts.",
     reflection: "I built this with Claude and spent a lot of time adding, changing, and refining features to get the site closer to what I envisioned. I learned that AI doesn't always understand exactly what I'm going for, so I had to be specific with my prompts and review what it added, especially when it came to personal details about me. Usage limits also pushed me to think ahead and make each prompt count."
   },
   {
@@ -39,6 +39,14 @@ const CARDS = [
     status: "idea",
     link: "",
     description: "A launch-window calculator that tells me when a rocket can reach a target orbit.",
+    reflection: ""
+  },
+  {
+    number: 6,
+    title: "Extra Artifact",
+    status: "idea",
+    link: "",
+    description: "An extra artifact beyond the five required ones, for extra labor credit.",
     reflection: ""
   }
 ];

@@ -208,7 +208,7 @@ nav a:hover { border-color: var(--red); background: var(--red); color: #fff; tra
 }
 .dish-row {
   display: grid; gap: .9rem;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
+  grid-template-columns: repeat(6, minmax(0, 1fr));
 }
 .dish {
   position: relative;
