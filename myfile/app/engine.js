@@ -40,13 +40,16 @@ function routes(fmt) {
     add("webp", "WebP", null, "Image", ["quality", "size"]);
     add("pdf", "PDF", null, "Document", ["quality", "size"]);
   } else if (fam === "pdf") {
+    add("docx", "Word", "editable text; layout not kept", "Document");
+    add("html", "HTML", "a web page of the text", "Document");
+    add("txt", "Text", "the PDF's text", "Document");
+    add("md", "Markdown", "the PDF's text", "Document");
     add("png", "PNG", "one image per page", "Image", ["size"]);
     add("jpg", "JPG", "one image per page", "Image", ["quality", "size"]);
-    add("txt", "Text", "the PDF's text", "Document");
   } else if (fam === "docx") {
     add("txt", "Text", null, "Document"); add("md", "Markdown", null, "Document"); add("html", "HTML", null, "Document"); add("pdf", "PDF", "text and headings", "Document");
   } else if (fam === "text") {
-    for (const [id, l] of [["pdf", "PDF"], ["html", "HTML"], ["txt", "Text"], ["md", "Markdown"]]) {
+    for (const [id, l] of [["pdf", "PDF"], ["docx", "Word"], ["html", "HTML"], ["txt", "Text"], ["md", "Markdown"]]) {
       if (fmt === "html" && id === "md") continue;
       add(id, l, null, "Document");
     }
@@ -174,6 +177,87 @@ async function pdfText(file) {
   return out;
 }
 
+/* ---------- Word (.docx) writer, and PDF text -> paragraphs ---------- */
+const xmlText = (s) => String(s)
+  .replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F\uFFFE\uFFFF]/g, "")
+  .replace(/\t/g, " ").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+const W_NS = "http://schemas.openxmlformats.org/wordprocessingml/2006/main";
+function docxPara(style, t) {
+  const ppr = style ? `<w:pPr><w:pStyle w:val="${style}"/></w:pPr>` : "";
+  return `<w:p>${ppr}<w:r><w:t xml:space="preserve">${xmlText(t)}</w:t></w:r></w:p>`;
+}
+/* sections: arrays of blocks; a page break separates sections. */
+async function docxBlob(sections, title) {
+  let body = "";
+  sections.forEach((blocks, i) => {
+    if (i > 0) body += `<w:p><w:r><w:br w:type="page"/></w:r></w:p>`;
+    for (const b of blocks) {
+      if (b.kind === "h") body += docxPara(`Heading${Math.min(3, Math.max(1, b.level))}`, b.text);
+      else if (b.kind === "li") body += docxPara("ListParagraph", "•  " + b.text);
+      else if (b.kind === "code") b.text.split("\n").forEach((l) => (body += docxPara("Code", l)));
+      else if (b.kind === "hr") body += `<w:p><w:pPr><w:pBdr><w:bottom w:val="single" w:sz="6" w:space="1" w:color="auto"/></w:pBdr></w:pPr></w:p>`;
+      else body += docxPara(null, b.text);
+    }
+  });
+  const head = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n`;
+  const heading = (n, sz, lvl, before, after) => `<w:style w:type="paragraph" w:styleId="Heading${n}"><w:name w:val="heading ${n}"/><w:basedOn w:val="Normal"/><w:next w:val="Normal"/><w:qFormat/><w:pPr><w:keepNext/><w:spacing w:before="${before}" w:after="${after}"/><w:outlineLvl w:val="${lvl}"/></w:pPr><w:rPr><w:b/><w:sz w:val="${sz}"/><w:szCs w:val="${sz}"/></w:rPr></w:style>`;
+  const zip = new JSZip();
+  zip.file("[Content_Types].xml", head + `<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/><Override PartName="/word/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.styles+xml"/><Override PartName="/docProps/core.xml" ContentType="application/vnd.openxmlformats-package.core-properties+xml"/></Types>`);
+  zip.file("_rels/.rels", head + `<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="word/document.xml"/><Relationship Id="rId2" Type="http://schemas.openxmlformats.org/package/2006/relationships/metadata/core-properties" Target="docProps/core.xml"/></Relationships>`);
+  zip.file("word/_rels/document.xml.rels", head + `<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/></Relationships>`);
+  zip.file("word/styles.xml", head + `<w:styles xmlns:w="${W_NS}"><w:docDefaults><w:rPrDefault><w:rPr><w:rFonts w:ascii="Calibri" w:hAnsi="Calibri" w:eastAsia="Calibri" w:cs="Calibri"/><w:sz w:val="22"/><w:szCs w:val="22"/><w:lang w:val="en-US"/></w:rPr></w:rPrDefault><w:pPrDefault><w:pPr><w:spacing w:after="160" w:line="264" w:lineRule="auto"/></w:pPr></w:pPrDefault></w:docDefaults><w:style w:type="paragraph" w:default="1" w:styleId="Normal"><w:name w:val="Normal"/><w:qFormat/></w:style>${heading(1, 36, 0, 240, 120)}${heading(2, 28, 1, 200, 80)}${heading(3, 24, 2, 160, 60)}<w:style w:type="paragraph" w:styleId="ListParagraph"><w:name w:val="List Paragraph"/><w:basedOn w:val="Normal"/><w:qFormat/><w:pPr><w:spacing w:after="60"/><w:ind w:left="360" w:hanging="360"/></w:pPr></w:style><w:style w:type="paragraph" w:styleId="Code"><w:name w:val="Code"/><w:basedOn w:val="Normal"/><w:pPr><w:spacing w:after="0" w:line="240" w:lineRule="auto"/></w:pPr><w:rPr><w:rFonts w:ascii="Consolas" w:hAnsi="Consolas" w:cs="Consolas"/><w:sz w:val="19"/><w:szCs w:val="19"/></w:rPr></w:style></w:styles>`);
+  zip.file("word/document.xml", head + `<w:document xmlns:w="${W_NS}"><w:body>${body}<w:sectPr><w:pgSz w:w="12240" w:h="15840"/><w:pgMar w:top="1440" w:right="1440" w:bottom="1440" w:left="1440" w:header="720" w:footer="720" w:gutter="0"/></w:sectPr></w:body></w:document>`);
+  zip.file("docProps/core.xml", head + `<cp:coreProperties xmlns:cp="http://schemas.openxmlformats.org/package/2006/metadata/core-properties" xmlns:dc="http://purl.org/dc/elements/1.1/"><dc:title>${xmlText(title)}</dc:title><dc:creator>MyFile</dc:creator></cp:coreProperties>`);
+  return zip.generateAsync({ type: "blob", mimeType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document", compression: "DEFLATE" });
+}
+
+/* Rebuild paragraphs from a PDF page's lines (same rules as the desktop app):
+   a line that doesn't end a sentence continues into the next; short lines
+   without end punctuation between sentences are headings; bullets and "1."
+   start list items. */
+function pdfPageBlocks(lines, firstPage) {
+  lines = lines.map((l) => l.trim()).filter(Boolean);
+  const endsSentence = (l) => /[.!?:;]$|\.[")]$/.test(l);
+  const bullet = (l) => {
+    const m = l.match(/^[•▪●\-*–][  ]+(.+)$/);
+    if (m) return m[1];
+    if (/^\d{1,2}[.)] /.test(l)) return l;
+    return null;
+  };
+  const headingish = (l) => l.length <= 60 && l.split(/\s+/).length <= 8 && !l.includes(". ") && !/[.,;!?]$/.test(l) && /^[\p{Lu}\d]/u.test(l);
+  const blocks = [];
+  let cur = null, prevEnded = true;
+  const flush = () => { if (cur) blocks.push(cur); cur = null; };
+  lines.forEach((l, i) => {
+    const next = lines[i + 1];
+    const item = bullet(l);
+    if (item !== null) { flush(); cur = { kind: "li", text: item }; prevEnded = endsSentence(l); return; }
+    const nextStartsNew = next === undefined || /^[\p{Lu}\d•\-*]/u.test(next);
+    const isHeading = prevEnded && headingish(l) && nextStartsNew;
+    if (isHeading && cur && cur.kind === "h") cur.text += " " + l;
+    else if (isHeading) { flush(); cur = { kind: "h", level: firstPage && !blocks.length ? 1 : 2, text: l }; }
+    else if (cur && (cur.kind === "p" || cur.kind === "li") && !prevEnded) {
+      if (cur.text.endsWith("-") && /^\p{Ll}/u.test(l)) cur.text = cur.text.slice(0, -1) + l;
+      else cur.text += " " + l;
+    } else { flush(); cur = { kind: "p", text: l }; }
+    prevEnded = isHeading ? true : endsSentence(l);
+  });
+  flush();
+  return blocks;
+}
+async function pdfPageLines(file) {
+  const pdf = await openPdf(file);
+  const pages = [];
+  for (let i = 1; i <= pdf.numPages; i++) {
+    const content = await (await pdf.getPage(i)).getTextContent();
+    let t = "";
+    for (const it of content.items) t += it.str + (it.hasEOL ? "\n" : " ");
+    pages.push(t.split("\n"));
+    progress(i / pdf.numPages);
+  }
+  return pages;
+}
+
 /* ---------- Documents: blocks -> PDF / HTML / Markdown / text ---------- */
 function markdownBlocks(md) {
   const blocks = [];
@@ -275,7 +359,7 @@ async function docxBlocks(file) {
     const style = (p.getElementsByTagNameNS(W, "pStyle")[0]?.getAttributeNS(W, "val") || "").toLowerCase();
     const level = style.startsWith("heading") ? parseInt(style.slice(7), 10) : style === "title" ? 1 : 0;
     if (level) blocks.push({ kind: "h", level, text: t });
-    else if (p.getElementsByTagNameNS(W, "numPr").length || style.includes("list")) blocks.push({ kind: "li", text: t });
+    else if (p.getElementsByTagNameNS(W, "numPr").length || style.includes("list")) blocks.push({ kind: "li", text: t.replace(/^[\u2022*-][\s\u00A0]*/, "") });
     else blocks.push({ kind: "p", text: t });
   }
   return blocks;
@@ -419,7 +503,13 @@ async function convert(file, fmt, target, s) {
   if (fam === "image") { const [b, ext] = await convertImage(file, target, s); return one(b, ext); }
   if (fam === "pdf") {
     if (target === "txt") return one(blobOf(await pdfText(file), "text/plain"), "txt");
-    return pdfToImages(file, target, s, stem);
+    if (target === "png" || target === "jpg") return pdfToImages(file, target, s, stem);
+    const pages = (await pdfPageLines(file)).map((lines, i) => pdfPageBlocks(lines, i === 0));
+    if (pages.every((p) => !p.length)) throw new Error("This PDF has no text to put in a document. (Scanned pages are pictures; try PNG or JPG.)");
+    if (target === "docx") return one(await docxBlob(pages, stem), "docx");
+    const all = pages.flatMap((p, i) => (i ? [{ kind: "hr" }, ...p] : p));
+    if (target === "html") return one(blobOf(htmlPage(stem, blocksToHtml(all)), "text/html"), "html");
+    return one(blobOf(blocksToMarkdown(all), "text/markdown"), "md");
   }
   if (fam === "docx" || fam === "text") {
     let blocks;
@@ -431,6 +521,7 @@ async function convert(file, fmt, target, s) {
     else blocks = textBlocks(await text(file));
     if (!blocks.length) throw new Error("No text was found in this file.");
     if (target === "pdf") return one(blocksToPdf(blocks), "pdf");
+    if (target === "docx") return one(await docxBlob([blocks], stem), "docx");
     if (target === "html") return one(blobOf(htmlPage(stem, blocksToHtml(blocks)), "text/html"), "html");
     if (target === "md") return one(blobOf(blocksToMarkdown(blocks), "text/markdown"), "md");
     return one(blobOf(blocksToText(blocks), "text/plain"), "txt");
