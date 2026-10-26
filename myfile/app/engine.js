@@ -561,3 +561,188 @@ async function convert(file, fmt, target, s) {
   throw new Error("MyFile can't convert this file in the browser.");
 }
 
+
+/* ---------- Folder report: every file, its details and contents, as one file ---------- */
+const REPORT_MAX_ROWS = 500, REPORT_MAX_FILE_CHARS = 200000, REPORT_MAX_LISTED = 300;
+const plural = (n, w) => `${n} ${w}${n === 1 ? "" : "s"}`;
+const lineCount = (t) => plural(t.trimEnd().split("\n").length, "line");
+const localDate = (ms) => new Date(ms).toLocaleDateString("en-CA");
+/* A table as aligned monospace lines (reads the same in Word, PDF and Markdown). */
+function tableCode(t) {
+  const cell = (c) => { c = String(c).replace(/[\r\n\t]/g, " "); return c.length > 30 ? c.slice(0, 29) + "…" : c; };
+  const rows = [t.headers, ...t.rows.slice(0, REPORT_MAX_ROWS)].map((r) => r.map(cell));
+  const cols = Math.max(0, ...rows.map((r) => r.length));
+  if (!cols) return [];
+  const w = [...Array(cols)].map((_, i) => Math.max(...rows.map((r) => (r[i] ?? "").length)));
+  const line = (r) => w.map((n, i) => (r[i] ?? "").padEnd(n)).join(" | ").trimEnd();
+  const out = [{ kind: "code", text: [line(rows[0]), w.map((n) => "-".repeat(n)).join("-+-"), ...rows.slice(1).map(line)].join("\n") }];
+  if (t.rows.length > REPORT_MAX_ROWS) out.push({ kind: "p", text: `…and ${t.rows.length - REPORT_MAX_ROWS} more rows.` });
+  return out;
+}
+/* Length (and picture size) of a recording, from the browser's media element. */
+function mediaDetails(file, video) {
+  return new Promise((resolve) => {
+    const m = document.createElement(video ? "video" : "audio");
+    const url = URL.createObjectURL(file);
+    const done = (v) => { clearTimeout(timer); URL.revokeObjectURL(url); m.removeAttribute("src"); resolve(v); };
+    const timer = setTimeout(() => done(null), 8000);
+    m.preload = "metadata";
+    m.onloadedmetadata = () => done({ seconds: isFinite(m.duration) ? m.duration : null, w: m.videoWidth || 0, h: m.videoHeight || 0 });
+    m.onerror = () => done(null);
+    m.src = url;
+  });
+}
+const clock = (s) => {
+  s = Math.round(s);
+  const mm = String(Math.floor(s / 60) % 60).padStart(2, "0"), ss = String(s % 60).padStart(2, "0");
+  return s >= 3600 ? `${Math.floor(s / 3600)}:${mm}:${ss}` : `${Math.floor(s / 60)}:${ss}`;
+};
+async function pptxBlocks(file) {
+  const zip = await JSZip.loadAsync(await file.arrayBuffer());
+  const slides = Object.keys(zip.files).map((n) => [Number((n.match(/^ppt\/slides\/slide(\d+)\.xml$/) || [])[1]), n]).filter(([n]) => n).sort((a, b) => a[0] - b[0]);
+  const blocks = [];
+  for (const [num, name] of slides) {
+    const xml = new DOMParser().parseFromString(await zip.file(name).async("string"), "application/xml");
+    blocks.push({ kind: "h", level: 2, text: `Slide ${num}` });
+    for (const p of xml.getElementsByTagNameNS("http://schemas.openxmlformats.org/drawingml/2006/main", "p")) {
+      const t = [...p.getElementsByTagNameNS("http://schemas.openxmlformats.org/drawingml/2006/main", "t")].map((n) => n.textContent).join("").trim();
+      if (t) blocks.push({ kind: "p", text: t });
+    }
+  }
+  return blocks;
+}
+async function readForReport(file, rel) {
+  const ext = (file.name.includes(".") ? file.name.split(".").pop() : "").toLowerCase();
+  const fmt = detect(file), fam = fmt ? FORMATS[fmt][0] : null;
+  const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
+  const label = fmt ? cap(FORMATS[fmt][1]) : ext === "pptx" ? "PowerPoint presentation" : ext === "zip" ? "ZIP archive" : ext ? `${ext.toUpperCase()} file` : "File";
+  const e = { path: rel, label, size: file.size, modified: file.lastModified, fam, details: [], blocks: [], note: null };
+  try {
+    if (!file.size) e.note = "Empty file.";
+    else if (fam === "pdf") {
+      const pages = await pdfPageLines(file);
+      e.details.push(plural(pages.length, "page"));
+      e.blocks = pages.flatMap((l, i) => pdfPageBlocks(l, i === 0));
+      if (!e.blocks.length) e.note = "Scanned pages with no text layer. (The desktop app can read them with OCR.)";
+    } else if (fam === "docx") e.blocks = await docxBlocks(file);
+    else if (fam === "text") {
+      const t = await text(file);
+      e.blocks = fmt === "md" ? markdownBlocks(t) : fmt === "html" ? htmlBlocks(t) : textBlocks(t);
+    } else if (fam === "table") {
+      const t = parseDelimited(await text(file), fmt === "tsv" ? "\t" : ",");
+      e.details.push(plural(t.rows.length, "row"));
+      e.blocks = tableCode(t);
+    } else if (fam === "data") {
+      const t = await text(file);
+      e.details.push(lineCount(t));
+      e.blocks = [{ kind: "code", text: t.trimEnd() }];
+    } else if (fam === "sheet") {
+      const wb = XLSX.read(new Uint8Array(await file.arrayBuffer()), { type: "array" });
+      e.details.push(plural(wb.SheetNames.length, "sheet"));
+      for (const n of wb.SheetNames) {
+        const rows = XLSX.utils.sheet_to_json(wb.Sheets[n], { header: 1, raw: false, defval: "" });
+        const t = { headers: (rows[0] || []).map(String), rows: rows.slice(1).filter((r) => r.some((c) => c !== "")).map((r) => r.map(String)) };
+        e.blocks.push({ kind: "h", level: 3, text: `Sheet: ${n}` }, ...tableCode(t));
+      }
+    } else if (fam === "subs") {
+      const t = writeCues(parseCues(await text(file)), "txt");
+      e.details.push(lineCount(t));
+      e.blocks = textBlocks(t);
+    } else if (fam === "image") {
+      const img = await loadImage(file);
+      e.details.push(`${img.naturalWidth} × ${img.naturalHeight} pixels`);
+    } else if (fam === "audio" || fam === "video") {
+      const m = await mediaDetails(file, fam === "video");
+      if (m && m.seconds) e.details.push(`${clock(m.seconds)} long`);
+      if (m && m.w) e.details.push(`${m.w} × ${m.h} video`);
+    } else if (ext === "pptx") {
+      e.blocks = await pptxBlocks(file);
+      e.details.push(plural(e.blocks.filter((b) => b.kind === "h").length, "slide"));
+    } else if (ext === "zip") {
+      const names = Object.values((await JSZip.loadAsync(await file.arrayBuffer())).files).filter((f) => !f.dir).map((f) => f.name);
+      e.details.push(`${plural(names.length, "file")} inside`);
+      e.blocks = names.slice(0, REPORT_MAX_LISTED).map((n) => ({ kind: "li", text: n }));
+      if (names.length > REPORT_MAX_LISTED) e.blocks.push({ kind: "p", text: `…and ${names.length - REPORT_MAX_LISTED} more.` });
+    } else {
+      // Unknown type: include it if it's text (source code, logs, configs).
+      const head = new Uint8Array(await file.slice(0, 8192).arrayBuffer());
+      let ok = !head.includes(0);
+      try { if (ok) new TextDecoder("utf-8", { fatal: true }).decode(head, { stream: true }); } catch { ok = false; }
+      if (!ok) e.note = "MyFile can't read inside this kind of file.";
+      else {
+        const t = (await file.slice(0, 2 * 1024 * 1024).text()).trimEnd();
+        e.label = ext ? `Text file (.${ext})` : "Text file";
+        e.details.push(lineCount(t));
+        e.blocks = [{ kind: "code", text: t }];
+      }
+    }
+  } catch (err) {
+    e.blocks = [];
+    e.note = err && err.message ? err.message : String(err);
+  }
+  let total = 0;
+  const cut = e.blocks.findIndex((b) => (total += (b.text || "").length) > REPORT_MAX_FILE_CHARS);
+  if (cut >= 0) e.blocks = [...e.blocks.slice(0, cut), { kind: "p", text: `(MyFile kept the first ${REPORT_MAX_FILE_CHARS.toLocaleString()} characters of this file.)` }];
+  e.words = e.blocks.reduce((s, b) => s + (b.text || "").split(/\s+/).filter(Boolean).length, 0);
+  return e;
+}
+/* items: [{ file, rel }]. onStep(done, total, rel) reports progress. */
+async function buildReport(items, name, onStep = () => {}) {
+  const entries = [];
+  const saved = progress;
+  progress = () => {};
+  try {
+    for (const [i, it] of items.entries()) {
+      onStep(i, items.length, it.rel);
+      await tick();
+      entries.push(await readForReport(it.file, it.rel));
+    }
+  } finally { progress = saved; }
+  onStep(items.length, items.length, null);
+  entries.sort((a, b) => a.path.toLowerCase().localeCompare(b.path.toLowerCase()));
+  const notes = [];
+  const media = entries.filter((e) => e.fam === "image" || e.fam === "audio" || e.fam === "video").length;
+  if (media) notes.push(`${media} ${media === 1 ? "image or recording" : "images or recordings"}: only details are listed. The desktop app also reads text in pictures (OCR) and transcribes recordings.`);
+  return { name, created: Date.now(), entries, notes };
+}
+function reportParts(r) {
+  const meta = (e) => [e.label, ...e.details, size(e.size), `modified ${localDate(e.modified)}`].join(" · ");
+  // A file's headings go under its own heading: its top level becomes 3.
+  const demote = (blocks) => {
+    const levels = blocks.filter((b) => b.kind === "h").map((b) => b.level);
+    const top = levels.length ? Math.min(...levels) : 1;
+    return blocks.map((b) => (b.kind === "h" ? { ...b, level: Math.min(6, b.level - top + 3) } : b));
+  };
+  const total = r.entries.reduce((s, e) => s + e.size, 0);
+  const read = r.entries.filter((e) => e.blocks.length).length;
+  const overview = [
+    { kind: "h", level: 1, text: r.name },
+    { kind: "p", text: `${plural(r.entries.length, "file")} (${size(total)}). MyFile read the contents of ${read} of them on ${localDate(r.created)}.` },
+    ...r.notes.map((n) => ({ kind: "li", text: n })),
+    { kind: "h", level: 2, text: "Files" },
+    ...r.entries.map((e) => ({ kind: "li", text: `${e.path}: ${meta(e)}` })),
+  ];
+  const parts = r.entries.map((e) => [{ kind: "h", level: 2, text: e.path }, { kind: "p", text: meta(e) }, ...(e.note ? [{ kind: "p", text: e.note }] : []), ...demote(e.blocks)]);
+  return [overview, parts];
+}
+/* target: docx, pdf, md, html, txt, json, or csv (the file list). */
+async function renderReport(r, target) {
+  const [overview, parts] = reportParts(r);
+  const all = [...overview, ...parts.flatMap((p) => [{ kind: "hr" }, ...p])];
+  switch (target) {
+    case "docx": return docxBlob([overview, parts.flat()], r.name);
+    case "pdf": return blocksToPdf(all);
+    case "md": return blobOf(blocksToMarkdown(all), "text/markdown");
+    case "html": return blobOf(htmlPage(r.name, blocksToHtml(all)), "text/html");
+    case "txt": return blobOf(blocksToText(all), "text/plain");
+    case "json": {
+      const files = r.entries.map((e) => ({ path: e.path, type: e.label, sizeBytes: e.size, modified: localDate(e.modified), details: e.details, words: e.words, note: e.note, text: e.blocks.length ? blocksToText(e.blocks) : "" }));
+      return blobOf(JSON.stringify({ folder: r.name, created: localDate(r.created), notes: r.notes, files }, null, 2) + "\n", "application/json");
+    }
+    case "csv": {
+      const rows = r.entries.map((e) => [e.path, e.label, String(e.size), localDate(e.modified), e.details.join("; "), String(e.words), e.note || ""]);
+      return blobOf(writeDelimited({ headers: ["path", "type", "size_bytes", "modified", "details", "words", "note"], rows }, ","), "text/csv");
+    }
+  }
+  throw new Error("MyFile can't save a folder report in that format.");
+}

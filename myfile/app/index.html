@@ -116,6 +116,11 @@
   .chip[aria-pressed="true"] { border-color: var(--accent); background: rgba(123, 156, 255, .14); box-shadow: 0 0 0 1px var(--accent); }
   .chip b { font-weight: 600; }
   .chip span { font-size: 11px; color: var(--text-2); }
+  .chip:disabled { opacity: .55; cursor: default; transform: none; }
+  .folder-line { margin: 14px 0 0; color: var(--text-2); font-size: 14px; }
+  .linkbtn { font: inherit; color: var(--accent); background: none; border: 0; padding: 0; cursor: pointer; text-decoration: underline; text-underline-offset: 3px; }
+  .card-hint { margin: -4px 0 12px; color: var(--text-2); font-size: 14px; }
+  .report-status { margin: 12px 0 0; font-size: 13px; color: var(--text-2); min-height: 1em; }
   .queue { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
   .row { display: grid; grid-template-columns: auto 1fr auto auto auto; align-items: center; gap: 14px; padding: 12px 14px; border: 1px solid var(--border); border-radius: 14px; background: var(--bg-2); animation: rise .35s cubic-bezier(.2, .8, .2, 1) both; }
   @keyframes rise { from { opacity: 0; transform: translateY(10px); } }
@@ -190,7 +195,7 @@
     <div class="hero">
       <span class="eyebrow">MyFile · File converter</span>
       <h1>Convert any file.<br><span class="grad">Right in your browser.</span></h1>
-      <p class="lead">Images, PDFs, documents, spreadsheets, data, subtitles and audio. Drop in as many files as you want. Nothing gets uploaded; it all happens on your device.</p>
+      <p class="lead">Images, PDFs, documents, spreadsheets, data, subtitles and audio. Drop in as many files as you want, or a whole folder. Nothing gets uploaded; it all happens on your device.</p>
       <div class="stats">
         <span class="stat"><b>60+</b> conversions</span>
         <span class="stat"><b>0</b> uploads</span>
@@ -201,10 +206,11 @@
         <div class="drop-icon" aria-hidden="true">
           <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 16V4M7 9l5-5 5 5M5 20h14"/></svg>
         </div>
-        <h2 id="drop-title">Drop files here</h2>
+        <h2 id="drop-title">Drop files or a folder here</h2>
         <p>or pick them from your computer</p>
         <span class="btn btn-primary">Choose files</span>
       </div>
+      <p class="folder-line">Or <button type="button" class="linkbtn" id="pick-folder">choose a whole folder</button> to pull everything in it into one Word, PDF or Markdown file.</p>
       <div class="marquee" aria-hidden="true"><div class="marquee-track" id="marquee"></div></div>
     </div>
 
@@ -222,12 +228,20 @@
       <h1 id="ws-title">Your files</h1>
       <span class="spacer"></span>
       <button type="button" class="btn btn-small" id="add">+ Add files</button>
+      <button type="button" class="btn btn-small" id="add-folder">+ Add a folder</button>
       <button type="button" class="btn btn-small" id="clear">Start over</button>
     </div>
 
     <div class="card" id="all-card" hidden>
       <p class="label">Convert all to</p>
       <div class="chips" id="all-chips" role="group" aria-label="Convert every file to"></div>
+    </div>
+
+    <div class="card" id="report-card" hidden>
+      <p class="label">Everything in one file</p>
+      <p class="card-hint">A list of every file, then each one's details and contents, combined into one document.</p>
+      <div class="chips" id="report-chips" role="group" aria-label="Save everything as"></div>
+      <p class="report-status" id="report-status" role="status"></p>
     </div>
 
     <ul class="queue" id="queue" aria-label="Files to convert"></ul>
@@ -264,6 +278,7 @@
 
   <p class="footnote">This is the browser version. The <a href="../">MyFile desktop app</a> adds an AI "describe it" box ("make it small enough to email"), video conversion, more formats, and Word/Excel/PowerPoint to PDF.</p>
   <input type="file" id="picker" multiple hidden>
+  <input type="file" id="folder-picker" webkitdirectory multiple hidden>
 </main>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
@@ -288,20 +303,110 @@ function toast(msg) { const t = el("div", "toast", msg); t.setAttribute("role", 
 // Marquee: the list twice so it scrolls seamlessly.
 for (const pass of [0, 1]) for (const m of MARQUEE) { const p = el("span", "pill"); const [a, b] = m.split(" → "); p.innerHTML = b ? `<b></b> → <b></b>` : `<b></b>`; const bs = p.querySelectorAll("b"); bs[0].textContent = a; if (b) bs[1].textContent = b; $("marquee").append(p); }
 
+/* list: Files, or { file, rel, root } for files from a folder. */
 function addFiles(list) {
-  for (const file of list) {
+  for (const item of list) {
+    const { file, rel = item.name, root = null } = item instanceof File ? { file: item } : item;
     if (file.size > MAX_BYTES) { toast(`${file.name} is over ${size(MAX_BYTES)}, so it was skipped.`); continue; }
     const fmt = detect(file);
-    rows.push({ id: nextId++, file, fmt, targets: fmt ? routes(fmt) : [], target: fmt ? routes(fmt)[0]?.id ?? null : null, result: null, error: null, state: "ready", fraction: null });
+    rows.push({ id: nextId++, file, rel, root, fmt, targets: fmt ? routes(fmt) : [], target: fmt ? routes(fmt)[0]?.id ?? null : null, result: null, error: null, state: "ready", fraction: null });
   }
+  report = null;
   render();
+}
+/* Hidden files and system clutter in a folder aren't added. */
+const skipName = (rel) => rel.split("/").some((p) => p.startsWith(".") || /^(desktop\.ini|thumbs\.db)$/i.test(p));
+function addFolderFiles(files) {
+  const items = [...files].map((f) => {
+    const parts = (f.webkitRelativePath || f.name).split("/");
+    return { file: f, root: parts.length > 1 ? parts[0] : null, rel: parts.length > 1 ? parts.slice(1).join("/") : parts[0] };
+  }).filter((i) => !skipName(i.rel));
+  if (!items.length) { toast("That folder has no files in it."); return; }
+  addFiles(items);
+}
+/* A dropped folder: walk it with the File System entries API. */
+async function droppedItems(dt) {
+  const entries = [...dt.items].map((i) => i.webkitGetAsEntry && i.webkitGetAsEntry()).filter(Boolean);
+  if (!entries.some((e) => e.isDirectory)) return [...dt.files];
+  const out = [];
+  const fileOf = (entry) => new Promise((res, rej) => entry.file(res, rej));
+  const readAll = (dir) => new Promise((res, rej) => {
+    const r = dir.createReader(), all = [];
+    const next = () => r.readEntries((batch) => (batch.length ? (all.push(...batch), next()) : res(all)), rej);
+    next();
+  });
+  async function walk(entry, root, prefix) {
+    if (out.length >= 1000) return;
+    if (entry.isFile) {
+      const rel = prefix + entry.name;
+      if (!skipName(rel)) out.push({ file: await fileOf(entry), rel, root });
+    } else if (entry.isDirectory) {
+      for (const child of await readAll(entry)) await walk(child, root, prefix + entry.name + "/");
+    }
+  }
+  for (const e of entries) {
+    if (e.isDirectory) for (const child of await readAll(e)) await walk(child, e.name, "");
+    else out.push(await fileOf(e));
+  }
+  return out;
+}
+
+/* ---------- Everything in one file ---------- */
+const REPORT_TARGETS = [["docx", "Word"], ["pdf", "PDF"], ["md", "Markdown"], ["html", "HTML"], ["txt", "Text"], ["json", "JSON"], ["csv", "File list", "CSV"]];
+let report = null, reporting = false;
+function reportName() {
+  const roots = new Set(rows.map((r) => r.root));
+  return roots.size === 1 && [...roots][0] ? [...roots][0] : "MyFile files";
+}
+async function saveReport(target) {
+  if (busy || reporting) return;
+  reporting = true;
+  render();
+  const status = $("report-status");
+  try {
+    if (!report) {
+      report = await buildReport(rows.map((r) => ({ file: r.file, rel: r.rel })), reportName(), (done, total, rel) => {
+        status.textContent = rel ? `Reading ${done + 1} of ${total} · ${rel}` : "Putting it together…";
+      });
+    }
+    const blob = await renderReport(report, target);
+    const name = `${report.name.replace(/[\\/:*?"<>|]/g, "_")} - ${target === "csv" ? "file list" : "everything"}.${target}`;
+    const a = el("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = name;
+    a.click();
+    setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+    window.__lastReport = { name, blob };
+    const read = report.entries.filter((e) => e.blocks.length).length;
+    const words = report.entries.reduce((s, e) => s + e.words, 0);
+    status.textContent = `${name} · ${size(blob.size)}. Read ${read} of ${report.entries.length} files, ${words.toLocaleString()} words.`;
+  } catch (e) {
+    status.textContent = `Couldn't make the file: ${e && e.message ? e.message : e}`;
+  } finally {
+    reporting = false;
+    render();
+  }
 }
 
 function render() {
   $("landing").hidden = rows.length > 0;
   $("workspace").hidden = rows.length === 0;
   if (!rows.length) return;
-  $("ws-title").textContent = rows.length === 1 ? "Your file" : `${rows.length} files`;
+  const roots = new Set(rows.map((r) => r.root));
+  $("ws-title").textContent = roots.size === 1 && [...roots][0] ? `${[...roots][0]} · ${rows.length} files` : rows.length === 1 ? "Your file" : `${rows.length} files`;
+
+  $("report-card").hidden = rows.length < 2;
+  const rchips = $("report-chips");
+  rchips.replaceChildren();
+  for (const [id, label, hint] of REPORT_TARGETS) {
+    const b = el("button", "chip");
+    b.type = "button";
+    b.append(el("b", "", label));
+    if (hint) b.append(el("span", "", hint));
+    b.disabled = busy || reporting;
+    b.addEventListener("click", () => saveReport(id));
+    rchips.append(b);
+  }
 
   // "Convert all to": targets every supported file can become.
   const supported = rows.filter((r) => r.fmt);
@@ -343,7 +448,8 @@ function render() {
   $("go").disabled = busy || !ready.length;
   $("go").textContent = busy ? "Converting…" : ready.length > 1 ? `Convert ${ready.length} files` : "Convert";
   $("zip").hidden = done.length < 2 || busy;
-  $("add").disabled = $("clear").disabled = busy;
+  $("add").disabled = $("add-folder").disabled = $("clear").disabled = busy || reporting;
+  $("go").disabled = $("go").disabled || reporting;
   const saved = done.reduce((s, r) => s + r.file.size, 0) - done.reduce((s, r) => s + r.result.size, 0);
   $("summary").innerHTML = "";
   if (done.length) {
@@ -358,7 +464,7 @@ function renderRow(li, r) {
   const icon = el("div", `ficon fam-${fam}`, r.fmt ? (["data", "subs", "audio", "video"].includes(fam) ? ABBR[fam] : r.fmt.toUpperCase().slice(0, 4)) : "?");
   icon.setAttribute("aria-hidden", "true");
   const info = el("div");
-  info.append(el("div", "rname", r.file.name), el("div", "rmeta", `${r.fmt ? FORMATS[r.fmt][1] : "Not supported in the browser"} · ${size(r.file.size)}`));
+  info.append(el("div", "rname", r.rel), el("div", "rmeta", `${r.fmt ? FORMATS[r.fmt][1] : "Not supported in the browser"} · ${size(r.file.size)}`));
 
   const selWrap = el("div", "rsel");
   if (r.targets.length) {
@@ -406,7 +512,8 @@ function renderRow(li, r) {
   rm.type = "button";
   rm.disabled = busy;
   rm.setAttribute("aria-label", `Remove ${r.file.name}`);
-  rm.addEventListener("click", () => { const i = rows.indexOf(r); if (r.result) URL.revokeObjectURL(r.result.url); rows.splice(i, 1); updateCompare(); render(); });
+  rm.disabled = busy || reporting;
+  rm.addEventListener("click", () => { const i = rows.indexOf(r); if (r.result) URL.revokeObjectURL(r.result.url); rows.splice(i, 1); report = null; updateCompare(); render(); });
   act.append(rm);
   act.style.display = "flex";
   act.style.gap = "6px";
@@ -502,7 +609,11 @@ const pickFiles = () => $("picker").click();
 $("drop").addEventListener("click", pickFiles);
 $("drop").addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); pickFiles(); } });
 $("add").addEventListener("click", pickFiles);
-$("clear").addEventListener("click", () => { rows.forEach((r) => r.result && URL.revokeObjectURL(r.result.url)); rows.length = 0; updateCompare(); render(); });
+$("clear").addEventListener("click", () => { rows.forEach((r) => r.result && URL.revokeObjectURL(r.result.url)); rows.length = 0; report = null; $("report-status").textContent = ""; updateCompare(); render(); });
+const pickFolder = () => $("folder-picker").click();
+$("pick-folder").addEventListener("click", pickFolder);
+$("add-folder").addEventListener("click", pickFolder);
+$("folder-picker").addEventListener("change", () => { addFolderFiles($("folder-picker").files); $("folder-picker").value = ""; });
 $("picker").addEventListener("change", () => { addFiles([...$("picker").files]); $("picker").value = ""; });
 $("go").addEventListener("click", convertAll);
 $("zip").addEventListener("click", downloadAll);
@@ -514,13 +625,13 @@ $("quality").addEventListener("input", () => {
 for (const id of ["size", "bitrate"]) $(id).addEventListener("change", () => { rows.forEach((r) => { if (r.state === "done") r.state = "ready"; }); render(); });
 let depth = 0;
 addEventListener("dragenter", (e) => { e.preventDefault(); depth++; $("drop").classList.add("is-dragging"); $("drop-title").textContent = "Release to add"; });
-addEventListener("dragleave", () => { if (--depth <= 0) { depth = 0; $("drop").classList.remove("is-dragging"); $("drop-title").textContent = "Drop files here"; } });
+addEventListener("dragleave", () => { if (--depth <= 0) { depth = 0; $("drop").classList.remove("is-dragging"); $("drop-title").textContent = "Drop files or a folder here"; } });
 addEventListener("dragover", (e) => e.preventDefault());
-addEventListener("drop", (e) => {
+addEventListener("drop", async (e) => {
   e.preventDefault(); depth = 0;
-  $("drop").classList.remove("is-dragging"); $("drop-title").textContent = "Drop files here";
-  if (busy) return;
-  addFiles([...e.dataTransfer.files]);
+  $("drop").classList.remove("is-dragging"); $("drop-title").textContent = "Drop files or a folder here";
+  if (busy || reporting) return;
+  addFiles(await droppedItems(e.dataTransfer));
 });
 </script>
 </body>
