@@ -288,7 +288,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/lamejs@1.2.1/lame.min.js"></script>
-<script src="engine.js"></script>
+<script src="engine.js?v=20261025"></script>
 <script>
 "use strict";
 /* ---------- The interface: a queue of files, each with a target ---------- */
@@ -322,7 +322,8 @@ function addFolderFiles(files) {
     return { file: f, root: parts.length > 1 ? parts[0] : null, rel: parts.length > 1 ? parts.slice(1).join("/") : parts[0] };
   }).filter((i) => !skipName(i.rel));
   if (!items.length) { toast("That folder has no files in it."); return; }
-  addFiles(items);
+  if (items.length > 1000) toast(`That folder has ${items.length} files; MyFile reads the first 1,000.`);
+  addFiles(items.slice(0, 1000));
 }
 /* A dropped folder: walk it with the File System entries API. */
 async function droppedItems(dt) {
