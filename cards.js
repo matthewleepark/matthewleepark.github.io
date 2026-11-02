@@ -27,10 +27,10 @@ const CARDS = [
   },
   {
     number: 4,
-    title: "Idea: Study Group Checklist",
-    status: "idea",
-    link: "",
-    description: "A study group tool where our learning group can share a weekly checklist and see who's done what.",
+    title: "Stitch Survival",
+    status: "wip",
+    link: "https://github.com/matthewleepark/StitchSurvival",
+    description: "A Roblox survival game inspired by LittleBigPlanet, made with Rosie. It has a handmade look of cardboard, felt and foam. Survive a collapsing five-floor bomb hotel or a clockwork shark on a tissue-paper ocean, then spend your Stickers on scuba gear rolls.",
     reflection: ""
   },
   {
