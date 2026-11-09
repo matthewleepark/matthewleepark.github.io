@@ -37,10 +37,11 @@ const CARDS = [
   },
   {
     number: 5,
-    title: "Idea: Launch Window Calculator",
-    status: "idea",
-    link: "",
-    description: "A launch-window calculator that tells me when a rocket can reach a target orbit.",
+    title: "Daymate",
+    status: "wip",
+    link: "https://github.com/matthewleepark/daymate",
+    app: "https://matthewleepark.github.io/daymate/",
+    description: "A simple shared family planner. Say it, type it or snap a photo of a school flyer, and Daymate turns it into events and reminders, checks the details with you, and shows who is taking care of what. Node + SQLite backend with family logins and permissions.",
     reflection: ""
   },
   {
