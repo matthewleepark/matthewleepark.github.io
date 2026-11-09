@@ -125,6 +125,8 @@ function openModal(card) {
   // Cards with a live app show two bubbles: "Open app" and "View repo".
   modalApp.hidden = !card.app;
   if (card.app) modalApp.href = card.app;
+  // The app button's words: "Open app" unless the card says otherwise (e.g. "Play on Roblox").
+  modalApp.firstChild.textContent = (card.appLabel || "Open app") + " ";
   modalLink.classList.toggle("secondary", !!card.app);
   modalLinkText.textContent = card.app ? "View repo" : "View artifact";
   if (card.app) { modalLink.target = "_blank"; modalLink.rel = "noopener"; }

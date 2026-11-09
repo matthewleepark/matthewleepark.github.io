@@ -27,11 +27,13 @@ const CARDS = [
   },
   {
     number: 4,
-    title: "Stitch Survival",
-    status: "wip",
+    title: "Survive the Stitch Hotel",
+    status: "done",
     link: "https://github.com/matthewleepark/StitchSurvival",
-    description: "A Roblox survival game inspired by LittleBigPlanet, made with Rosie. It has a handmade look of cardboard, felt and foam. Survive a collapsing five-floor bomb hotel or a clockwork shark on a tissue-paper ocean, then spend your Stickers on scuba gear rolls.",
-    reflection: ""
+    app: "https://www.roblox.com/games/85929683455229/Survive-the-Stitch-Hotel",
+    appLabel: "Play on Roblox",
+    description: "A horror survival game on Roblox, made with Rosie. You play as a knitted doll in a creepy hotel and vote on the next map at the lobby's voting stage: Bomb Hotel, Shark Survival, Killer Hotel, or Hide & Seek. It has passives to roll for with Stickers, daily challenges, leaderboards, saved progress, spectator mode, and an admin panel.",
+    reflection: "This was my first time working on a project with a teammate, so I had to think about more than just my own code. Rosie and I each had our own parts, worked on separate branches, and wrote everything down in a shared log so we both knew what changed. I used Claude Code to build a lot of the game, like the shark, saving progress, daily challenges, Hide & Seek, and the map vote. I learned that a game has a lot of moving parts, and one change can break something somewhere else, so testing in Roblox Studio after every change was really important. I also learned to look at the game the way a player would, like noticing when the signs were hard to read or the menus covered each other on phones, and asking for those to be fixed. Overall, it showed me how much planning and teamwork go into finishing a real game."
   },
   {
     number: 5,
