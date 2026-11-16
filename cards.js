@@ -37,10 +37,10 @@ const CARDS = [
   },
   {
     number: 5,
-    title: "",
+    title: "Echelon",
     status: "wip",
-    link: "",
-    description: "",
+    link: "https://github.com/matthewleepark/ECHELON",
+    description: "The Moonshot: a status-signaling social app run as a social experiment, built with Tifanie Ngo. Users spend in-app credits (no real money) to keep a streak, climb five status tiers, and pay to unlock higher-tier profiles, while an AI concierge treats them differently by tier. We're testing how much people give up for the look of higher status. Proposal done; soft launch to real users on Nov 29.",
     reflection: ""
   },
   {
