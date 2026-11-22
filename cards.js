@@ -40,7 +40,7 @@ const CARDS = [
     title: "Echelon",
     status: "wip",
     link: "https://github.com/matthewleepark/ECHELON",
-    description: "The Moonshot: a status-signaling social app run as a social experiment, built with Tifanie Ngo. Users spend in-app credits (no real money) to keep a streak, climb five status tiers, and pay to unlock higher-tier profiles, while an AI concierge treats them differently by tier. We're testing how much people give up for the look of higher status. Proposal done; soft launch to real users on Nov 29.",
+    description: "The Moonshot: a status-signaling social app run as a research study, built with Tifanie Ngo. Members spend play credits (no real money) on dues every three days to keep a streak, climb from Commoner to Sovereign, and pay to unlock higher-tier profiles, while an AI concierge (Claude Haiku) is snobby or polite depending on their tier. Built with Next.js, Supabase with row-level security, and atomic credit transactions. v1 app built and tested; soft launch to real users on Nov 29.",
     reflection: ""
   },
   {
